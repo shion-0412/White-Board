@@ -1,0 +1,27 @@
+
+/* Class = "NSTextFieldCell"; title = "Size"; ObjectID = "BcQ-4y-Q7J"; */
+"BcQ-4y-Q7J.title" = "大きさ";
+
+/* Class = "NSTextFieldCell"; title = "Text Label"; ObjectID = "ILb-Lk-GWN"; */
+"ILb-Lk-GWN.title" = "テキスト";
+
+/* Class = "NSTextFieldCell"; title = "Shape"; ObjectID = "K9s-N8-Kff"; */
+"K9s-N8-Kff.title" = "図形";
+
+/* Class = "NSTextFieldCell"; title = "Save as image"; ObjectID = "cBD-8L-ieQ"; */
+"cBD-8L-ieQ.title" = "画像として保存";
+
+/* Class = "NSTextFieldCell"; title = "Erase"; ObjectID = "j7F-1F-xhh"; */
+"j7F-1F-xhh.title" = "リセット";
+
+/* Class = "NSButtonCell"; title = "Save as image"; ObjectID = "kEx-1X-xAZ"; */
+"kEx-1X-xAZ.title" = "実行";
+
+/* Class = "NSButtonCell"; title = "Erase"; ObjectID = "odM-hy-mh1"; */
+"odM-hy-mh1.title" = "実行";
+
+/* Class = "NSTextFieldCell"; title = "Color"; ObjectID = "r9k-x4-cUD"; */
+"r9k-x4-cUD.title" = "色";
+
+/* Class = "NSTextFieldCell"; placeholderString = "Press Enter to add lael"; ObjectID = "rXw-QZ-VOM"; */
+"rXw-QZ-VOM.placeholderString" = "Enterを押すと追加できます";

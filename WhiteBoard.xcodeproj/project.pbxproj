@@ -7,12 +7,16 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		05358C1925CFD2D700D4537E /* PaletteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05358C1825CFD2D700D4537E /* PaletteView.swift */; };
+		05358C1F25CFDBBA00D4537E /* DrawView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05358C1E25CFDBBA00D4537E /* DrawView.swift */; };
+		05358C2725D1506B00D4537E /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05358C2625D1506B00D4537E /* Extensions.swift */; };
 		0593770825C97418003F18A9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0593770725C97418003F18A9 /* AppDelegate.swift */; };
-		0593770A25C97418003F18A9 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0593770925C97418003F18A9 /* ViewController.swift */; };
+		0593770A25C97418003F18A9 /* InitialViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0593770925C97418003F18A9 /* InitialViewController.swift */; };
 		0593770C25C9741C003F18A9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0593770B25C9741C003F18A9 /* Assets.xcassets */; };
 		0593770F25C9741C003F18A9 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0593770D25C9741C003F18A9 /* Main.storyboard */; };
 		0593771B25C9741C003F18A9 /* justpaintTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0593771A25C9741C003F18A9 /* justpaintTests.swift */; };
 		0593772625C9741D003F18A9 /* justpaintUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0593772525C9741D003F18A9 /* justpaintUITests.swift */; };
+		05B3D6F825D7A73C008A6859 /* PaletteView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 05B3D6FA25D7A73C008A6859 /* PaletteView.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -33,19 +37,25 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		0593770425C97418003F18A9 /* justpaint.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = justpaint.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		05358C1825CFD2D700D4537E /* PaletteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaletteView.swift; sourceTree = "<group>"; };
+		05358C1E25CFDBBA00D4537E /* DrawView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawView.swift; sourceTree = "<group>"; };
+		05358C2625D1506B00D4537E /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
+		0593770425C97418003F18A9 /* White Board.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "White Board.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		0593770725C97418003F18A9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		0593770925C97418003F18A9 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		0593770925C97418003F18A9 /* InitialViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InitialViewController.swift; sourceTree = "<group>"; };
 		0593770B25C9741C003F18A9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		0593770E25C9741C003F18A9 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		0593771025C9741C003F18A9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		0593771125C9741C003F18A9 /* justpaint.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = justpaint.entitlements; sourceTree = "<group>"; };
-		0593771625C9741C003F18A9 /* justpaintTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = justpaintTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		0593771625C9741C003F18A9 /* white-boardTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "white-boardTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		0593771A25C9741C003F18A9 /* justpaintTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = justpaintTests.swift; sourceTree = "<group>"; };
 		0593771C25C9741C003F18A9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		0593772125C9741D003F18A9 /* justpaintUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = justpaintUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		0593772125C9741D003F18A9 /* white-boardUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "white-boardUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		0593772525C9741D003F18A9 /* justpaintUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = justpaintUITests.swift; sourceTree = "<group>"; };
 		0593772725C9741D003F18A9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		05B3D6F425D7A4ED008A6859 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Main.strings; sourceTree = "<group>"; };
+		05B3D6F925D7A73C008A6859 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/PaletteView.xib; sourceTree = "<group>"; };
+		05B3D6FC25D7A742008A6859 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/PaletteView.strings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -86,9 +96,9 @@
 		0593770525C97418003F18A9 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				0593770425C97418003F18A9 /* justpaint.app */,
-				0593771625C9741C003F18A9 /* justpaintTests.xctest */,
-				0593772125C9741D003F18A9 /* justpaintUITests.xctest */,
+				0593770425C97418003F18A9 /* White Board.app */,
+				0593771625C9741C003F18A9 /* white-boardTests.xctest */,
+				0593772125C9741D003F18A9 /* white-boardUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -97,7 +107,11 @@
 			isa = PBXGroup;
 			children = (
 				0593770725C97418003F18A9 /* AppDelegate.swift */,
-				0593770925C97418003F18A9 /* ViewController.swift */,
+				0593770925C97418003F18A9 /* InitialViewController.swift */,
+				05358C1E25CFDBBA00D4537E /* DrawView.swift */,
+				05B3D6FA25D7A73C008A6859 /* PaletteView.xib */,
+				05358C1825CFD2D700D4537E /* PaletteView.swift */,
+				05358C2625D1506B00D4537E /* Extensions.swift */,
 				0593770B25C9741C003F18A9 /* Assets.xcassets */,
 				0593770D25C9741C003F18A9 /* Main.storyboard */,
 				0593771025C9741C003F18A9 /* Info.plist */,
@@ -127,9 +141,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		0593770325C97418003F18A9 /* justpaint */ = {
+		0593770325C97418003F18A9 /* white-board */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 0593772A25C9741D003F18A9 /* Build configuration list for PBXNativeTarget "justpaint" */;
+			buildConfigurationList = 0593772A25C9741D003F18A9 /* Build configuration list for PBXNativeTarget "white-board" */;
 			buildPhases = (
 				0593770025C97418003F18A9 /* Sources */,
 				0593770125C97418003F18A9 /* Frameworks */,
@@ -139,14 +153,14 @@
 			);
 			dependencies = (
 			);
-			name = justpaint;
+			name = "white-board";
 			productName = justpaint;
-			productReference = 0593770425C97418003F18A9 /* justpaint.app */;
+			productReference = 0593770425C97418003F18A9 /* White Board.app */;
 			productType = "com.apple.product-type.application";
 		};
-		0593771525C9741C003F18A9 /* justpaintTests */ = {
+		0593771525C9741C003F18A9 /* white-boardTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 0593772D25C9741D003F18A9 /* Build configuration list for PBXNativeTarget "justpaintTests" */;
+			buildConfigurationList = 0593772D25C9741D003F18A9 /* Build configuration list for PBXNativeTarget "white-boardTests" */;
 			buildPhases = (
 				0593771225C9741C003F18A9 /* Sources */,
 				0593771325C9741C003F18A9 /* Frameworks */,
@@ -157,14 +171,14 @@
 			dependencies = (
 				0593771825C9741C003F18A9 /* PBXTargetDependency */,
 			);
-			name = justpaintTests;
+			name = "white-boardTests";
 			productName = justpaintTests;
-			productReference = 0593771625C9741C003F18A9 /* justpaintTests.xctest */;
+			productReference = 0593771625C9741C003F18A9 /* white-boardTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		0593772025C9741D003F18A9 /* justpaintUITests */ = {
+		0593772025C9741D003F18A9 /* white-boardUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 0593773025C9741D003F18A9 /* Build configuration list for PBXNativeTarget "justpaintUITests" */;
+			buildConfigurationList = 0593773025C9741D003F18A9 /* Build configuration list for PBXNativeTarget "white-boardUITests" */;
 			buildPhases = (
 				0593771D25C9741D003F18A9 /* Sources */,
 				0593771E25C9741D003F18A9 /* Frameworks */,
@@ -175,9 +189,9 @@
 			dependencies = (
 				0593772325C9741D003F18A9 /* PBXTargetDependency */,
 			);
-			name = justpaintUITests;
+			name = "white-boardUITests";
 			productName = justpaintUITests;
-			productReference = 0593772125C9741D003F18A9 /* justpaintUITests.xctest */;
+			productReference = 0593772125C9741D003F18A9 /* white-boardUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
@@ -202,22 +216,23 @@
 					};
 				};
 			};
-			buildConfigurationList = 059376FF25C97418003F18A9 /* Build configuration list for PBXProject "justpaint" */;
+			buildConfigurationList = 059376FF25C97418003F18A9 /* Build configuration list for PBXProject "White Board" */;
 			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 				Base,
+				ja,
 			);
 			mainGroup = 059376FB25C97418003F18A9;
 			productRefGroup = 0593770525C97418003F18A9 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				0593770325C97418003F18A9 /* justpaint */,
-				0593771525C9741C003F18A9 /* justpaintTests */,
-				0593772025C9741D003F18A9 /* justpaintUITests */,
+				0593770325C97418003F18A9 /* white-board */,
+				0593771525C9741C003F18A9 /* white-boardTests */,
+				0593772025C9741D003F18A9 /* white-boardUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -227,6 +242,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				05B3D6F825D7A73C008A6859 /* PaletteView.xib in Resources */,
 				0593770C25C9741C003F18A9 /* Assets.xcassets in Resources */,
 				0593770F25C9741C003F18A9 /* Main.storyboard in Resources */,
 			);
@@ -253,7 +269,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0593770A25C97418003F18A9 /* ViewController.swift in Sources */,
+				05358C2725D1506B00D4537E /* Extensions.swift in Sources */,
+				0593770A25C97418003F18A9 /* InitialViewController.swift in Sources */,
+				05358C1925CFD2D700D4537E /* PaletteView.swift in Sources */,
+				05358C1F25CFDBBA00D4537E /* DrawView.swift in Sources */,
 				0593770825C97418003F18A9 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -279,12 +298,12 @@
 /* Begin PBXTargetDependency section */
 		0593771825C9741C003F18A9 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 0593770325C97418003F18A9 /* justpaint */;
+			target = 0593770325C97418003F18A9 /* white-board */;
 			targetProxy = 0593771725C9741C003F18A9 /* PBXContainerItemProxy */;
 		};
 		0593772325C9741D003F18A9 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 0593770325C97418003F18A9 /* justpaint */;
+			target = 0593770325C97418003F18A9 /* white-board */;
 			targetProxy = 0593772225C9741D003F18A9 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -294,8 +313,18 @@
 			isa = PBXVariantGroup;
 			children = (
 				0593770E25C9741C003F18A9 /* Base */,
+				05B3D6F425D7A4ED008A6859 /* ja */,
 			);
 			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		05B3D6FA25D7A73C008A6859 /* PaletteView.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				05B3D6F925D7A73C008A6859 /* Base */,
+				05B3D6FC25D7A742008A6859 /* ja */,
+			);
+			name = PaletteView.xib;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
@@ -305,6 +334,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -366,6 +396,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -424,7 +455,7 @@
 				CODE_SIGN_ENTITLEMENTS = justpaint/justpaint.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = 2HQKJ4AD2X;
+				DEVELOPMENT_TEAM = T7NP67H8TC;
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = justpaint/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -432,7 +463,7 @@
 					"@executable_path/../Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = engineer.justpaint;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = "White Board";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -445,7 +476,7 @@
 				CODE_SIGN_ENTITLEMENTS = justpaint/justpaint.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = 2HQKJ4AD2X;
+				DEVELOPMENT_TEAM = T7NP67H8TC;
 				ENABLE_HARDENED_RUNTIME = YES;
 				INFOPLIST_FILE = justpaint/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -453,7 +484,7 @@
 					"@executable_path/../Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = engineer.justpaint;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = "White Board";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -476,7 +507,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = engineer.justpaintTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/justpaint.app/Contents/MacOS/justpaint";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/white-board.app/Contents/MacOS/white-board";
 			};
 			name = Debug;
 		};
@@ -498,7 +529,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = engineer.justpaintTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/justpaint.app/Contents/MacOS/justpaint";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/white-board.app/Contents/MacOS/white-board";
 			};
 			name = Release;
 		};
@@ -545,7 +576,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		059376FF25C97418003F18A9 /* Build configuration list for PBXProject "justpaint" */ = {
+		059376FF25C97418003F18A9 /* Build configuration list for PBXProject "White Board" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				0593772825C9741D003F18A9 /* Debug */,
@@ -554,7 +585,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		0593772A25C9741D003F18A9 /* Build configuration list for PBXNativeTarget "justpaint" */ = {
+		0593772A25C9741D003F18A9 /* Build configuration list for PBXNativeTarget "white-board" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				0593772B25C9741D003F18A9 /* Debug */,
@@ -563,7 +594,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		0593772D25C9741D003F18A9 /* Build configuration list for PBXNativeTarget "justpaintTests" */ = {
+		0593772D25C9741D003F18A9 /* Build configuration list for PBXNativeTarget "white-boardTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				0593772E25C9741D003F18A9 /* Debug */,
@@ -572,7 +603,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		0593773025C9741D003F18A9 /* Build configuration list for PBXNativeTarget "justpaintUITests" */ = {
+		0593773025C9741D003F18A9 /* Build configuration list for PBXNativeTarget "white-boardUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				0593773125C9741D003F18A9 /* Debug */,
