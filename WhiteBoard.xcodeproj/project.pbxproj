@@ -10,6 +10,7 @@
 		05358C1925CFD2D700D4537E /* PaletteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05358C1825CFD2D700D4537E /* PaletteView.swift */; };
 		05358C1F25CFDBBA00D4537E /* DrawView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05358C1E25CFDBBA00D4537E /* DrawView.swift */; };
 		05358C2725D1506B00D4537E /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05358C2625D1506B00D4537E /* Extensions.swift */; };
+		058EF8B625E7BECF00BBCEE9 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 056DABA525E7AFA300E3F46E /* Localizable.strings */; };
 		0593770825C97418003F18A9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0593770725C97418003F18A9 /* AppDelegate.swift */; };
 		0593770A25C97418003F18A9 /* InitialViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0593770925C97418003F18A9 /* InitialViewController.swift */; };
 		0593770C25C9741C003F18A9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0593770B25C9741C003F18A9 /* Assets.xcassets */; };
@@ -40,6 +41,8 @@
 		05358C1825CFD2D700D4537E /* PaletteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaletteView.swift; sourceTree = "<group>"; };
 		05358C1E25CFDBBA00D4537E /* DrawView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawView.swift; sourceTree = "<group>"; };
 		05358C2625D1506B00D4537E /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
+		056DABA425E7AFA300E3F46E /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
+		056DABA625E7AFA900E3F46E /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		0593770425C97418003F18A9 /* WhiteBoard.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WhiteBoard.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0593770725C97418003F18A9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		0593770925C97418003F18A9 /* InitialViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InitialViewController.swift; sourceTree = "<group>"; };
@@ -106,6 +109,7 @@
 		0593770625C97418003F18A9 /* WhiteBoard */ = {
 			isa = PBXGroup;
 			children = (
+				056DABA525E7AFA300E3F46E /* Localizable.strings */,
 				0593770725C97418003F18A9 /* AppDelegate.swift */,
 				0593770925C97418003F18A9 /* InitialViewController.swift */,
 				05358C1E25CFDBBA00D4537E /* DrawView.swift */,
@@ -243,6 +247,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				05B3D6F825D7A73C008A6859 /* PaletteView.xib in Resources */,
+				058EF8B625E7BECF00BBCEE9 /* Localizable.strings in Resources */,
 				0593770C25C9741C003F18A9 /* Assets.xcassets in Resources */,
 				0593770F25C9741C003F18A9 /* Main.storyboard in Resources */,
 			);
@@ -309,6 +314,15 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
+		056DABA525E7AFA300E3F46E /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				056DABA425E7AFA300E3F46E /* ja */,
+				056DABA625E7AFA900E3F46E /* en */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
 		0593770D25C9741C003F18A9 /* Main.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (

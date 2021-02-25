@@ -9,6 +9,9 @@ import Cocoa
 
 var globalColor: NSColor = NSColor.black
 var globalSize: ChoosableSize = .first
+var fillsShapes: Bool = true
+var shapeBorderWidth: CGFloat = 5
+var drawingMode: DrawingMode = .line
 var firstLineWidth: CGFloat = 3
 var secondLineWidth: CGFloat = 7.5
 var thirdLineWidth: CGFloat = 20
@@ -40,10 +43,6 @@ class InitialViewController: NSViewController, PaletteViewDelegate, InitialViewC
     
     func createImage() {
         drawView.createImage()
-    }
-    
-    func addShape(type: ChoosableShape) {
-        drawView.addShape(type: type)
     }
     
     func addLabel(text: String) {

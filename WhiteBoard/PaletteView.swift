@@ -22,6 +22,8 @@ class PaletteView: NSView, ChoosableShapeDelegate, ChoosableSizeDelegate, Choosa
     @IBOutlet weak var thirdColorView: ChoosableColorView!
     @IBOutlet weak var fourthColorView: ChoosableColorView!
     @IBOutlet weak var labelTextField: NSTextField!
+    @IBOutlet weak var drawModeButton: NSButtonCell!
+    
     weak var delegate: PaletteViewDelegate?
     
     override init(frame frameRect: NSRect) {
@@ -84,6 +86,23 @@ class PaletteView: NSView, ChoosableShapeDelegate, ChoosableSizeDelegate, Choosa
         super.draw(dirtyRect)
     }
  
+    @IBAction func switchFill(_ sender: NSButton) {
+        if sender.state == .on {
+            fillsShapes = true
+        } else {
+            fillsShapes = false
+        }
+    }
+    
+    @IBAction func drawArrow(_ sender: Any) {
+        if drawingMode == .arrow {
+            drawModeButton.title = NSLocalizedString("drawArrows", comment: "")
+            drawingMode = .line
+        } else if drawingMode == .line {
+            drawModeButton.title = NSLocalizedString("drawLines", comment: "")
+            drawingMode = .arrow
+        }
+    }
     
     @IBAction func clearCanvas(_ sender: Any) {
         delegate?.clearCanvas()
@@ -93,8 +112,20 @@ class PaletteView: NSView, ChoosableShapeDelegate, ChoosableSizeDelegate, Choosa
         delegate?.createImage()
     }
     
-    func addShape(type: ChoosableShape) {
-        delegate?.addShape(type: type)
+    func addShape(type: DrawingMode) {
+        [squareShapeView, circleShapeView, triangleShapeView].forEach {
+            $0.borderWidth = 0
+        }
+        if type == .square {
+            squareShapeView.borderWidth = 1
+            squareShapeView.borderColor = .black
+        } else if type == .circle {
+            circleShapeView.borderWidth = 1
+            circleShapeView.borderColor = .black
+        } else if type == .triangle {
+            triangleShapeView.borderWidth = 1
+            triangleShapeView.borderColor = .black
+        }
     }
     
     func changeColor(order: ChoosableColorOrder) {
@@ -148,7 +179,6 @@ class PaletteView: NSView, ChoosableShapeDelegate, ChoosableSizeDelegate, Choosa
 protocol PaletteViewDelegate: class {
     func clearCanvas()
     func createImage()
-    func addShape(type: ChoosableShape)
     func addLabel(text: String)
 }
 
@@ -200,7 +230,7 @@ enum ChoosableSize {
 
 class ChoosableShapeView: NSView {
     
-    var shapeType: ChoosableShape = .square
+    var shapeType: DrawingMode = .square
     weak var delegate: ChoosableShapeDelegate?
     
     override func draw(_ dirtyRect: NSRect) {
@@ -227,18 +257,20 @@ class ChoosableShapeView: NSView {
     }
     
     override func mouseDown(with event: NSEvent) {
+        drawingMode = shapeType
         delegate?.addShape(type: shapeType)
     }
     
 }
 
 protocol ChoosableShapeDelegate: class {
-    func addShape(type: ChoosableShape)
+    func addShape(type: DrawingMode)
 }
 
-enum ChoosableShape {
+enum DrawingMode {
+    case line
+    case arrow
     case square
     case triangle
     case circle
 }
-
