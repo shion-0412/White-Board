@@ -1,6 +1,6 @@
 
 /* Class = "NSTextFieldCell"; title = "Size"; ObjectID = "BcQ-4y-Q7J"; */
-"BcQ-4y-Q7J.title" = "大きさ";
+"BcQ-4y-Q7J.title" = "サイズ";
 
 /* Class = "NSTextFieldCell"; title = "Text Label"; ObjectID = "ILb-Lk-GWN"; */
 "ILb-Lk-GWN.title" = "テキスト";
@@ -22,3 +22,4 @@
 /* Class = "NSTextFieldCell"; placeholderString = "Press Enter to add lael"; ObjectID = "rXw-QZ-VOM"; */
 "rXw-QZ-VOM.placeholderString" = "Enterを押すと追加できます";
 
+"NF8-7K-hwb.title" = "画像を貼る";

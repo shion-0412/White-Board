@@ -14,6 +14,7 @@ class DrawView: NSView {
     var temporaryLineView: LineView?
     var lastViews: [NSView] = []
     var temporaryOriginalLocation: NSPoint?
+    private var trackingArea: NSTrackingArea?
     
     override func draw(_ dirtyRect: NSRect) {
         NSColor.white.setFill()
@@ -21,14 +22,59 @@ class DrawView: NSView {
         super.draw(dirtyRect)
     }
     
+    override func updateTrackingAreas() {
+        super.updateTrackingAreas()
+        if self.trackingArea != nil {
+            self.removeTrackingArea(self.trackingArea!)
+            self.trackingArea = nil
+        }
+        let options: NSTrackingArea.Options = [.mouseMoved, .mouseEnteredAndExited, .activeAlways]
+        let rect = NSRect(origin: .zero, size: self.frame.size)
+        self.trackingArea = NSTrackingArea(rect: rect, options: options, owner: self, userInfo: nil)
+        self.addTrackingArea(self.trackingArea!)
+    }
+    
+    override func mouseEntered(with event: NSEvent) {
+        setCurrentCursor()
+    }
+    
+    override func mouseExited(with event: NSEvent) {
+        NSCursor.arrow.set()
+    }
+    
+    public func setCurrentCursor() {
+        if drawingMode == .marker {
+            addCursorRect(self.bounds, cursor: markerCursor)
+        } else {
+            NSCursor.crosshair.set()
+        }
+    }
+    
     override func mouseDown(with event: NSEvent) {
+        Timer.scheduledTimer(withTimeInterval: 0.01, repeats: false, block: {_ in
+            self.setCurrentCursor()
+        })
         temporaryLinePath = NSBezierPath()
         temporaryLineView = LineView(frame: self.bounds)
         temporaryLineView!.path = temporaryLinePath
         temporaryLineView?.pathColor = globalColor
+        temporaryLineView?.drawingMode = drawingMode
+        temporaryLineView?.fillsShapes = fillsShapes
         self.addSubview(temporaryLineView!)
-        temporaryLinePath!.lineJoinStyle = .round
-        temporaryLinePath!.lineCapStyle = .round
+        switch drawingMode {
+        case .arrow:
+            temporaryLinePath!.lineJoinStyle = .bevel
+            temporaryLinePath!.lineCapStyle = .square
+        case .line:
+            temporaryLinePath!.lineJoinStyle = .bevel
+            temporaryLinePath!.lineCapStyle = .square
+        case .square:
+            temporaryLinePath!.lineJoinStyle = .miter
+            temporaryLinePath!.lineCapStyle = .square
+        default:
+            temporaryLinePath!.lineJoinStyle = .round
+            temporaryLinePath!.lineCapStyle = .round
+        }
         var lineWidth: CGFloat = firstLineWidth
         if globalSize == .second {
             lineWidth = secondLineWidth
@@ -47,15 +93,17 @@ class DrawView: NSView {
     }
     
     override func mouseDragged(with event: NSEvent) {
-        if drawingMode == .line {
+        guard temporaryLinePath != nil else { return }
+        switch drawingMode {
+        case .marker:
+            drawTemporaryMarker(locationInWindow: event.locationInWindow)
+        case .line:
             drawTemporaryLine(locationInWindow: event.locationInWindow)
-        } else if drawingMode == .arrow {
+        case .arrow:
             drawTemporaryArrow(locationInWindow: event.locationInWindow)
-        } else if drawingMode == .square {
+        case .square:
             drawTemporarySquare(locationInWindow: event.locationInWindow)
-        } else if drawingMode == .triangle {
-            drawTemporaryTriangle(locationInWindow: event.locationInWindow)
-        } else if drawingMode == .circle {
+        case .circle:
             drawTemporaryCircle(locationInWindow: event.locationInWindow)
         }
     }
@@ -64,66 +112,42 @@ class DrawView: NSView {
         temporaryLinePath = nil
         temporaryLineView = nil
         temporaryOriginalLocation = nil
-        if drawingMode != .arrow {
-            drawingMode = .line
-        }
     }
     
-    private func drawTemporaryTriangle(locationInWindow: NSPoint) {
+    private func drawTemporaryMarker(locationInWindow: NSPoint) {
         let locationInView = NSPoint(x: locationInWindow.x - self.frame.origin.x, y: locationInWindow.y - 2 * self.frame.origin.y)
-        temporaryLinePath?.removeAllPoints()
-        temporaryLinePath!.move(to: temporaryOriginalLocation!)
-        temporaryLinePath!.line(to: NSPoint(x: locationInView.x, y: temporaryOriginalLocation!.y))
-        let topX = (locationInView.x + temporaryOriginalLocation!.x) / 2
-        var topY = temporaryOriginalLocation!.y + abs(locationInView.x - temporaryOriginalLocation!.x) * sqrt(3) / 2
-        if temporaryOriginalLocation!.y > locationInView.y {
-            topY = temporaryOriginalLocation!.y - abs(locationInView.x - temporaryOriginalLocation!.x) * sqrt(3) / 2
-        }
-        temporaryLinePath!.line(to: NSPoint(x: topX, y: topY))
-        temporaryLinePath!.line(to: temporaryOriginalLocation!)
-        temporaryLineView!.needsDisplay = true
-    }
-    
-    private func drawTemporaryCircle(locationInWindow: NSPoint) {
-        let locationInView = NSPoint(x: locationInWindow.x - self.frame.origin.x, y: locationInWindow.y - 2 * self.frame.origin.y)
-        temporaryLinePath?.removeAllPoints()
-        var rectX = temporaryOriginalLocation!.x
-        let diffX = locationInView.x - temporaryOriginalLocation!.x
-        if diffX < 0 {
-            rectX += diffX
-        }
-        var rectY = temporaryOriginalLocation!.y
-        let diffY = locationInView.y - temporaryOriginalLocation!.y
-        if diffY < 0 {
-            rectY += diffY
-        }
-        let rect = NSRect(x: rectX, y: rectY, width: abs(diffX), height: abs(diffY))
-        temporaryLinePath!.appendOval(in: rect)
-        temporaryLineView!.needsDisplay = true
-    }
-    
-    private func drawTemporarySquare(locationInWindow: NSPoint) {
-        let locationInView = NSPoint(x: locationInWindow.x - self.frame.origin.x, y: locationInWindow.y - 2 * self.frame.origin.y)
-        temporaryLinePath?.removeAllPoints()
-        temporaryLinePath!.move(to: temporaryOriginalLocation!)
-        temporaryLinePath!.line(to: NSPoint(x: locationInView.x, y: temporaryOriginalLocation!.y))
         temporaryLinePath!.line(to: locationInView)
-        temporaryLinePath!.line(to: NSPoint(x: temporaryOriginalLocation!.x, y: locationInView.y))
-        temporaryLinePath!.line(to: temporaryOriginalLocation!)
         temporaryLineView!.needsDisplay = true
     }
     
     private func drawTemporaryLine(locationInWindow: NSPoint) {
-        if temporaryLinePath != nil {
-            let locationInView = NSPoint(x: locationInWindow.x - self.frame.origin.x, y: locationInWindow.y - 2 * self.frame.origin.y)
-            temporaryLinePath!.line(to: locationInView)
-            temporaryLinePath!.move(to: locationInView)
-            temporaryLineView!.needsDisplay = true
+        var locationInView = NSPoint(x: locationInWindow.x - self.frame.origin.x, y: locationInWindow.y - 2 * self.frame.origin.y)
+        if shiftKeyIsPressed {
+            let diffX = abs(locationInView.x - temporaryOriginalLocation!.x)
+            let diffY = abs(locationInView.y - temporaryOriginalLocation!.y)
+            if diffX <= diffY {
+                locationInView = NSPoint(x: temporaryOriginalLocation!.x, y: locationInView.y)
+            } else {
+                locationInView = NSPoint(x: locationInView.x, y: temporaryOriginalLocation!.y)
+            }
         }
+        temporaryLinePath?.removeAllPoints()
+        temporaryLinePath!.move(to: temporaryOriginalLocation!)
+        temporaryLinePath!.line(to: locationInView)
+        temporaryLineView!.needsDisplay = true
     }
     
     private func drawTemporaryArrow(locationInWindow: NSPoint) {
-        let locationInView = NSPoint(x: locationInWindow.x - self.frame.origin.x, y: locationInWindow.y - 2 * self.frame.origin.y)
+        var locationInView = NSPoint(x: locationInWindow.x - self.frame.origin.x, y: locationInWindow.y - 2 * self.frame.origin.y)
+        if shiftKeyIsPressed {
+            let diffX = abs(locationInView.x - temporaryOriginalLocation!.x)
+            let diffY = abs(locationInView.y - temporaryOriginalLocation!.y)
+            if diffX <= diffY {
+                locationInView = NSPoint(x: temporaryOriginalLocation!.x, y: locationInView.y)
+            } else {
+                locationInView = NSPoint(x: locationInView.x, y: temporaryOriginalLocation!.y)
+            }
+        }
         temporaryLinePath?.removeAllPoints()
         temporaryLinePath!.move(to: temporaryOriginalLocation!)
         temporaryLinePath!.line(to: locationInView)
@@ -144,6 +168,98 @@ class DrawView: NSView {
         temporaryLinePath!.move(to: locationInView)
         temporaryLinePath!.line(to: rightPoint)
         temporaryLineView!.needsDisplay = true
+    }
+    
+    private func drawTemporarySquare(locationInWindow: NSPoint) {
+        var locationInView = NSPoint(x: locationInWindow.x - self.frame.origin.x, y: locationInWindow.y - 2 * self.frame.origin.y)
+        temporaryLinePath?.removeAllPoints()
+        temporaryLinePath!.move(to: temporaryOriginalLocation!)
+        if shiftKeyIsPressed {
+            let diffX = locationInView.x - temporaryOriginalLocation!.x
+            let diffY = locationInView.y - temporaryOriginalLocation!.y
+            if abs(diffX) <= abs(diffY) {
+                locationInView = NSPoint(x: temporaryOriginalLocation!.x + abs(diffY) * diffX / abs(diffX),
+                                         y: locationInView.y)
+            } else {
+                locationInView = NSPoint(x: locationInView.x,
+                                         y: temporaryOriginalLocation!.y + abs(diffX) * diffY / abs(diffY))
+            }
+        }
+        temporaryLinePath!.line(to: NSPoint(x: locationInView.x, y: temporaryOriginalLocation!.y))
+        temporaryLinePath!.line(to: locationInView)
+        temporaryLinePath!.line(to: NSPoint(x: temporaryOriginalLocation!.x, y: locationInView.y))
+        temporaryLinePath!.line(to: temporaryOriginalLocation!)
+        temporaryLineView!.needsDisplay = true
+    }
+    
+    private func drawTemporaryCircle(locationInWindow: NSPoint) {
+        let locationInView = NSPoint(x: locationInWindow.x - self.frame.origin.x, y: locationInWindow.y - 2 * self.frame.origin.y)
+        temporaryLinePath?.removeAllPoints()
+        var rectX = temporaryOriginalLocation!.x
+        var rectY = temporaryOriginalLocation!.y
+        let diffX = locationInView.x - temporaryOriginalLocation!.x
+        let diffY = locationInView.y - temporaryOriginalLocation!.y
+        var rect: NSRect = .zero
+        if shiftKeyIsPressed {
+            let width = max(abs(diffX), abs(diffY))
+            if diffX < 0 {
+                rectX -= width
+            }
+            if diffY < 0 {
+                rectY -= width
+            }
+            rect = NSRect(x: rectX, y: rectY, width: width, height: width)
+        } else {
+            if diffX < 0 {
+                rectX += diffX
+            }
+            if diffY < 0 {
+                rectY += diffY
+            }
+            rect = NSRect(x: rectX, y: rectY, width: abs(diffX), height: abs(diffY))
+        }
+        temporaryLinePath!.appendOval(in: rect)
+        temporaryLineView!.needsDisplay = true
+    }
+    
+    public func addImage() {
+        let dialog = NSOpenPanel()
+        dialog.canChooseDirectories = false
+        dialog.canChooseFiles = true
+        dialog.canCreateDirectories = false
+        dialog.allowsMultipleSelection = false
+        dialog.allowedFileTypes = NSImage.imageTypes
+        dialog.begin { (result) -> Void in
+            if result == .OK {
+                guard dialog.url != nil else { return }
+                let image = NSImage(contentsOf: dialog.url!)
+                var maxLength: CGFloat = 100
+                if globalSize == .second {
+                    maxLength = 200
+                } else if globalSize == .third {
+                    maxLength = 400
+                } else if globalSize == .fourth {
+                    maxLength = 800
+                }
+                let orgSize = image!.size
+                let orgRatio = orgSize.height / orgSize.width
+                var newSize = CGSize.zero
+                if orgSize.width >= orgSize.height {
+                    newSize.width = maxLength
+                    newSize.height = maxLength * orgRatio
+                } else {
+                    newSize.height = maxLength
+                    newSize.width = maxLength / orgRatio
+                }
+                let imageView = ImageView()
+                imageView.frame = NSRect(origin: NSPoint(x: 100, y: 100), size: newSize)
+                imageView.imageScaling = .scaleAxesIndependently
+                imageView.image = NSImage(contentsOf: dialog.url!)
+                imageView.borderColor = .green
+                imageView.borderWidth = 1
+                self.addSubview(imageView)
+            }
+        }
     }
     
     public func clearCanvas() {
@@ -224,15 +340,17 @@ class LineView: NSView {
     var path: NSBezierPath?
     var pathColor: NSColor?
     var lineWidth: CGFloat?
+    var drawingMode: DrawingMode = .marker
+    var fillsShapes = false
     
     override func draw(_ dirtyRect: NSRect) {
         if path != nil {
             pathColor?.set()
-            if drawingMode == .line || drawingMode == .arrow || !fillsShapes {
+            if (self.drawingMode == .square || self.drawingMode == .circle) && self.fillsShapes {
+                path!.fill()
+            } else {
                 path!.lineWidth = lineWidth != nil ? lineWidth! : firstLineWidth
                 path!.stroke()
-            } else {
-                path!.fill()
             }
         }
     }
@@ -244,120 +362,134 @@ enum PathType {
     case label
 }
 
-//class ShapeView: NSView {
-//
-//    var originalPoint: NSPoint?
-//    var type: DrawingMode?
-//    var fillsThisShape: Bool!
-//
-//    override func draw(_ dirtyRect: NSRect) {
-//        let path = NSBezierPath()
-//        let halfBorderWidth: CGFloat = fillsThisShape ? 0 : shapeBorderWidth / 2
-//        let width = self.frame.width - halfBorderWidth
-//        switch self.type {
-//        case .triangle:
-//            let initialX = sqrt(3) * halfBorderWidth
-//            let rightX = self.frame.width - initialX
-//            path.move(to: NSPoint(x: initialX, y: halfBorderWidth))
-//            path.line(to: NSPoint(x: rightX, y: halfBorderWidth))
-//            path.line(to: NSPoint(x: (initialX + rightX) / 2, y: ((rightX - initialX) * sqrt(3) / 2) + halfBorderWidth))
-//            path.line(to: NSPoint(x: halfBorderWidth * sqrt(3) / 2, y: -1 * halfBorderWidth / 2))
-//        case .circle:
-//            let rect = NSRect(x: halfBorderWidth, y: halfBorderWidth, width: width - halfBorderWidth, height: width - halfBorderWidth)
-//            path.appendOval(in: rect)
-//        default:
-//            path.move(to: NSPoint(x: halfBorderWidth, y: halfBorderWidth))
-//            path.line(to: NSPoint(x: width, y: halfBorderWidth))
-//            path.line(to: NSPoint(x: width, y: width))
-//            path.line(to: NSPoint(x: halfBorderWidth, y: width))
-//            path.line(to: NSPoint(x: halfBorderWidth, y: 0))
-//        }
-//        globalColor.set()
-//        if fillsThisShape {
-//            path.fill()
+class ImageView: NSImageView {
+    
+    var originalPoint: NSPoint?
+    private var trackingArea: NSTrackingArea?
+//    private var cursorPosition: CursorPosition = .other
+    
+    override func updateTrackingAreas() {
+        super.updateTrackingAreas()
+        if self.trackingArea != nil {
+            self.removeTrackingArea(self.trackingArea!)
+            self.trackingArea = nil
+        }
+        let options: NSTrackingArea.Options = [.mouseMoved, .mouseEnteredAndExited, .activeAlways]
+        let rect = NSRect(origin: .zero, size: self.frame.size)
+        self.trackingArea = NSTrackingArea(rect: rect, options: options, owner: self, userInfo: nil)
+        self.addTrackingArea(self.trackingArea!)
+    }
+    
+    override func mouseEntered(with event: NSEvent) {
+        NSCursor.openHand.set()
+    }
+    
+    override func mouseExited(with event: NSEvent) {
+        (superview as! DrawView).setCurrentCursor()
+    }
+
+//    override func mouseMoved(with event: NSEvent) {
+//        let originXInWindow = superview!.frame.origin.x + self.frame.origin.x
+//        let originYInWindow = superview!.frame.origin.y + self.frame.origin.y
+//        let locationInView = NSPoint(x: event.locationInWindow.x - originXInWindow, y: event.locationInWindow.y - originYInWindow)
+//        let threshold: CGFloat = 10
+//        if locationInView.x <= threshold || self.frame.width - locationInView.x <= threshold {
+//            cursorPosition = .edgeLeftRight
+//            NSCursor.resizeLeftRight.set()
+//        } else if locationInView.y <= threshold || self.frame.height - locationInView.y <= threshold {
+//            cursorPosition = .edgeUpDown
+//            NSCursor.resizeUpDown.set()
 //        } else {
-//            path.lineWidth = shapeBorderWidth
-//            path.stroke()
+//            cursorPosition = .other
+//            NSCursor.arrow.set()
 //        }
 //    }
-//
-//    override func mouseDown(with event: NSEvent) {
-//        originalPoint = event.locationInWindow
-//    }
-//
-//    override func mouseDragged(with event: NSEvent) {
-//        if originalPoint != nil {
-//            let differenceX = event.locationInWindow.x - originalPoint!.x
-//            let differenceY = event.locationInWindow.y - originalPoint!.y
-//            let rect = self.frame
-//            self.frame = NSRect(x: rect.origin.x + differenceX, y: rect.origin.y + differenceY, width: rect.width, height: rect.height)
+    
+    override func mouseDown(with event: NSEvent) {
+        originalPoint = event.locationInWindow
+        NSCursor.closedHand.set()
+    }
+    
+    override func mouseDragged(with event: NSEvent) {
+        guard originalPoint != nil else { return }
+        NSCursor.closedHand.set()
+        let differenceX = event.locationInWindow.x - originalPoint!.x
+        let differenceY = event.locationInWindow.y - originalPoint!.y
+        let rect = self.frame
+//        if cursorPosition == .edgeLeftRight {
+//            self.frame = NSRect(x: rect.origin.x, y: rect.origin.y, width: rect.width + differenceX, height: rect.height)
 //            originalPoint = event.locationInWindow
-//        }
-//    }
-//
-//    override func mouseUp(with event: NSEvent) {
-//        let newView = UnclickableShapeView(frame: self.frame)
-//        newView.endPoint = self.frame
-//        newView.type = type
-//        newView.endColor = globalColor
-//        newView.fillsThisShape = fillsThisShape
-//        superview?.addSubview(newView)
-//        self.removeFromSuperview()
-//    }
-//}
-//
-//class UnclickableShapeView: NSView {
-//
-//    var type: DrawingMode?
-//    var endColor: NSColor?
-//    var endPoint: CGRect = CGRect.zero
-//    var fillsThisShape: Bool!
-//
-//    override func draw(_ dirtyRect: NSRect) {
-//        super.draw(dirtyRect)
-//        let path = NSBezierPath()
-//        let halfBorderWidth: CGFloat = fillsThisShape ? 0 : shapeBorderWidth / 2
-//        let width = self.frame.width - halfBorderWidth
-//        switch self.type {
-//        case .triangle:
-//            let initialX = sqrt(3) * halfBorderWidth
-//            let rightX = self.frame.width - initialX
-//            path.move(to: NSPoint(x: initialX, y: halfBorderWidth))
-//            path.line(to: NSPoint(x: rightX, y: halfBorderWidth))
-//            path.line(to: NSPoint(x: (initialX + rightX) / 2, y: ((rightX - initialX) * sqrt(3) / 2) + halfBorderWidth))
-//            path.line(to: NSPoint(x: halfBorderWidth * sqrt(3) / 2, y: -1 * halfBorderWidth / 2))
-//        case .circle:
-//            let rect = NSRect(x: halfBorderWidth, y: halfBorderWidth, width: width - halfBorderWidth, height: width - halfBorderWidth)
-//            path.appendOval(in: rect)
-//        default:
-//            path.move(to: NSPoint(x: halfBorderWidth, y: halfBorderWidth))
-//            path.line(to: NSPoint(x: width, y: halfBorderWidth))
-//            path.line(to: NSPoint(x: width, y: width))
-//            path.line(to: NSPoint(x: halfBorderWidth, y: width))
-//            path.line(to: NSPoint(x: halfBorderWidth, y: 0))
-//        }
-//        endColor?.set()
-//        if fillsThisShape {
-//            path.fill()
+//        } else if cursorPosition == .edgeUpDown {
+//            self.frame = NSRect(x: rect.origin.x, y: rect.origin.y, width: rect.width, height: rect.height + differenceY)
+//            originalPoint = event.locationInWindow
 //        } else {
-//            path.lineWidth = shapeBorderWidth
-//            path.stroke()
+            self.frame = NSRect(x: rect.origin.x + differenceX, y: rect.origin.y + differenceY, width: rect.width, height: rect.height)
+            originalPoint = event.locationInWindow
 //        }
-//        self.frame = endPoint
-//    }
-//
-//}
+//        self.updateTrackingAreas()
+    }
+    
+    override func mouseUp(with event: NSEvent) {
+        let newImageView = UnclickableImageView(frame: self.frame)
+        newImageView.imageScaling = .scaleAxesIndependently
+        newImageView.image = self.image
+        superview?.addSubview(newImageView)
+        self.removeFromSuperview()
+    }
+    
+}
+
+class UnclickableImageView: NSImageView {
+    
+    override func draw(_ dirtyRect: NSRect) {
+        super.draw(dirtyRect)
+        Timer.scheduledTimer(withTimeInterval: 0.01, repeats: false, block: {_ in
+            (self.superview as! DrawView).setCurrentCursor()
+        })
+    }
+    
+}
+
+
+enum CursorPosition {
+    case edgeLeftRight
+    case edgeUpDown
+    case other
+}
 
 class Label: NSTextField {
     
     var originalPoint: NSPoint?
+    private var trackingArea: NSTrackingArea?
+    
+    override func updateTrackingAreas() {
+        super.updateTrackingAreas()
+        if self.trackingArea != nil {
+            self.removeTrackingArea(self.trackingArea!)
+            self.trackingArea = nil
+        }
+        let options: NSTrackingArea.Options = [.mouseMoved, .mouseEnteredAndExited, .activeAlways]
+        let rect = NSRect(origin: .zero, size: self.frame.size)
+        self.trackingArea = NSTrackingArea(rect: rect, options: options, owner: self, userInfo: nil)
+        self.addTrackingArea(self.trackingArea!)
+    }
+    
+    override func mouseEntered(with event: NSEvent) {
+        NSCursor.openHand.set()
+    }
+    
+    override func mouseExited(with event: NSEvent) {
+        (superview as! DrawView).setCurrentCursor()
+    }
     
     override func mouseDown(with event: NSEvent) {
         originalPoint = event.locationInWindow
+        NSCursor.closedHand.set()
     }
     
     override func mouseDragged(with event: NSEvent) {
         if originalPoint != nil {
+            NSCursor.closedHand.set()
             let differenceX = event.locationInWindow.x - originalPoint!.x
             let differenceY = event.locationInWindow.y - originalPoint!.y
             let rect = self.frame
@@ -395,6 +527,9 @@ class UnclickableLabel: NSTextField {
     override func draw(_ dirtyRect: NSRect) {
         super.draw(dirtyRect)
         self.frame = endPoint
+        Timer.scheduledTimer(withTimeInterval: 0.01, repeats: false, block: {_ in
+            (self.superview as! DrawView).setCurrentCursor()
+        })
     }
     
 }

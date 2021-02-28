@@ -6,11 +6,33 @@
 //
 
 import Cocoa
+import Carbon
+
+var markerCursor: NSCursor = .pointingHand
+var globalColor: NSColor = NSColor.black
+var globalSize: ChoosableSize = .first
+var shiftKeyIsPressed = false
+var fillsShapes: Bool = false
+var shapeBorderWidth: CGFloat = 5
+var drawingMode: DrawingMode = .marker
+var firstLineWidth: CGFloat = 3
+var secondLineWidth: CGFloat = 7.5
+var thirdLineWidth: CGFloat = 20
+var fourthLineWidth: CGFloat = 80
+var firstShapeWidth: CGFloat = 100
+var secondShapeWidth: CGFloat = 150
+var thirdShapeWidth: CGFloat = 200
+var fourthShapeWidth: CGFloat = 400
+var firstLabelSize: CGFloat = 14
+var secondLabelSize: CGFloat = 20
+var thirdLabelSize: CGFloat = 30
+var fourthLabelSize: CGFloat = 60
 
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
 
     weak var initialViewControllerDelegate: InitialViewControllerDelegate?
+    var shiftKeyMonitor: Any?
     
     @IBAction func undo(_ sender: Any) {
         initialViewControllerDelegate?.undo()
@@ -25,14 +47,27 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-        // Insert code here to initialize your application
+        shiftKeyMonitor = NSEvent.addLocalMonitorForEvents(matching: .flagsChanged, handler: { (event) -> NSEvent? in
+            if event.keyCode == 56 {
+                shiftKeyIsPressed.toggle()
+            }
+            return event
+        })
+        if let image = NSImage(named: "black") {
+            markerCursor = NSCursor(image: image, hotSpot: NSPoint(x: 7, y: 42))
+        }
     }
 
     func applicationWillTerminate(_ aNotification: Notification) {
-        // Insert code here to tear down your application
+        NSEvent.removeMonitor(shiftKeyMonitor)
+        shiftKeyMonitor = nil
     }
 
-
+    func hotKeyPressed() {
+//        print("pressed ")
+    }
+    
+    
 }
 
 protocol InitialViewControllerDelegate: class {

@@ -16,13 +16,13 @@ class PaletteView: NSView, ChoosableShapeDelegate, ChoosableSizeDelegate, Choosa
     @IBOutlet weak var fourthSizeView: ChoosableSizeView!
     @IBOutlet weak var squareShapeView: ChoosableShapeView!
     @IBOutlet weak var circleShapeView: ChoosableShapeView!
-    @IBOutlet weak var triangleShapeView: ChoosableShapeView!
+    @IBOutlet weak var arrowShapeView: ChoosableShapeView!
+    @IBOutlet weak var lineShapeView: ChoosableShapeView!
     @IBOutlet weak var firstColorView: ChoosableColorView!
     @IBOutlet weak var secondColorView: ChoosableColorView!
     @IBOutlet weak var thirdColorView: ChoosableColorView!
     @IBOutlet weak var fourthColorView: ChoosableColorView!
     @IBOutlet weak var labelTextField: NSTextField!
-    @IBOutlet weak var drawModeButton: NSButtonCell!
     
     weak var delegate: PaletteViewDelegate?
     
@@ -65,8 +65,10 @@ class PaletteView: NSView, ChoosableShapeDelegate, ChoosableSizeDelegate, Choosa
         squareShapeView.delegate = self
         circleShapeView.shapeType = .circle
         circleShapeView.delegate = self
-        triangleShapeView.shapeType = .triangle
-        triangleShapeView.delegate = self
+        arrowShapeView.shapeType = .arrow
+        arrowShapeView.delegate = self
+        lineShapeView.shapeType = .line
+        lineShapeView.delegate = self
         firstColorView.delegate = self
         firstColorView.order = .first
         secondColorView.delegate = self
@@ -94,14 +96,8 @@ class PaletteView: NSView, ChoosableShapeDelegate, ChoosableSizeDelegate, Choosa
         }
     }
     
-    @IBAction func drawArrow(_ sender: Any) {
-        if drawingMode == .arrow {
-            drawModeButton.title = NSLocalizedString("drawArrows", comment: "")
-            drawingMode = .line
-        } else if drawingMode == .line {
-            drawModeButton.title = NSLocalizedString("drawLines", comment: "")
-            drawingMode = .arrow
-        }
+    @IBAction func AddImage(_ sender: Any) {
+        delegate?.addImage()
     }
     
     @IBAction func clearCanvas(_ sender: Any) {
@@ -112,19 +108,15 @@ class PaletteView: NSView, ChoosableShapeDelegate, ChoosableSizeDelegate, Choosa
         delegate?.createImage()
     }
     
-    func addShape(type: DrawingMode) {
-        [squareShapeView, circleShapeView, triangleShapeView].forEach {
-            $0.borderWidth = 0
-        }
-        if type == .square {
-            squareShapeView.borderWidth = 1
-            squareShapeView.borderColor = .black
-        } else if type == .circle {
-            circleShapeView.borderWidth = 1
-            circleShapeView.borderColor = .black
-        } else if type == .triangle {
-            triangleShapeView.borderWidth = 1
-            triangleShapeView.borderColor = .black
+    func changeDrawingMode(type: DrawingMode) {
+        drawingMode = .marker
+        [squareShapeView, circleShapeView, arrowShapeView, lineShapeView].forEach {
+            if $0!.shapeType == type && $0!.borderWidth == 0 {
+                $0!.borderWidth = 1
+                drawingMode = type
+            } else {
+                $0!.borderWidth = 0
+            }
         }
     }
     
@@ -136,12 +128,24 @@ class PaletteView: NSView, ChoosableShapeDelegate, ChoosableSizeDelegate, Choosa
         switch order {
         case .first:
             firstColorView.borderColor = .green
+            if let image = NSImage(named: "white") {
+                markerCursor = NSCursor(image: image, hotSpot: NSPoint(x: 7, y: 42))
+            }
         case .second:
             secondColorView.borderColor = .green
+            if let image = NSImage(named: "black") {
+                markerCursor = NSCursor(image: image, hotSpot: NSPoint(x: 7, y: 42))
+            }
         case .third:
             thirdColorView.borderColor = .green
+            if let image = NSImage(named: "red") {
+                markerCursor = NSCursor(image: image, hotSpot: NSPoint(x: 7, y: 42))
+            }
         case .fourth:
             fourthColorView.borderColor = .green
+            if let image = NSImage(named: "blue") {
+                markerCursor = NSCursor(image: image, hotSpot: NSPoint(x: 7, y: 42))
+            }
         }
     }
     
@@ -177,6 +181,7 @@ class PaletteView: NSView, ChoosableShapeDelegate, ChoosableSizeDelegate, Choosa
 }
 
 protocol PaletteViewDelegate: class {
+    func addImage()
     func clearCanvas()
     func createImage()
     func addLabel(text: String)
@@ -234,43 +239,57 @@ class ChoosableShapeView: NSView {
     weak var delegate: ChoosableShapeDelegate?
     
     override func draw(_ dirtyRect: NSRect) {
+        NSColor.green.set()
         let path = NSBezierPath()
         let width = self.frame.width
         switch shapeType {
-        case .triangle:
-            path.move(to: NSPoint(x: 0, y: 0))
-            path.line(to: NSPoint(x: width, y: 0))
-            path.line(to: NSPoint(x: width / 2, y: sqrt(3) * width / 2))
-            path.line(to: NSPoint(x: 0, y: 0))
+        case .arrow:
+            let lineWidth: CGFloat = 6
+            let range = width - lineWidth / 2
+            path.move(to: NSPoint(x: lineWidth / 2, y: lineWidth / 2))
+            path.line(to: NSPoint(x: range, y: range))
+            path.line(to: NSPoint(x: range / 2, y: range))
+            path.move(to: NSPoint(x: range, y: range))
+            path.line(to: NSPoint(x: range, y: range / 2))
+            path.lineWidth = lineWidth
+            path.stroke()
         case .circle:
             let rect = NSRect(x: 0, y: 0, width: width, height: width)
             path.appendOval(in: rect)
-        default:
+            path.fill()
+        case .square:
             path.move(to: NSPoint(x: 0, y: 0))
             path.line(to: NSPoint(x: width, y: 0))
             path.line(to: NSPoint(x: width, y: width))
             path.line(to: NSPoint(x: 0, y: width))
             path.line(to: NSPoint(x: 0, y: 0))
+            path.fill()
+        case .line:
+            let lineWidth: CGFloat = 6
+            let range = width - lineWidth / 2
+            path.move(to: NSPoint(x: lineWidth / 2, y: lineWidth / 2))
+            path.line(to: NSPoint(x: range, y: range))
+            path.lineWidth = lineWidth
+            path.stroke()
+        case .marker:
+            break
         }
-        NSColor.green.set()
-        path.fill()
     }
     
     override func mouseDown(with event: NSEvent) {
-        drawingMode = shapeType
-        delegate?.addShape(type: shapeType)
+        delegate?.changeDrawingMode(type: shapeType)
     }
     
 }
 
 protocol ChoosableShapeDelegate: class {
-    func addShape(type: DrawingMode)
+    func changeDrawingMode(type: DrawingMode)
 }
 
 enum DrawingMode {
+    case marker
     case line
     case arrow
     case square
-    case triangle
     case circle
 }

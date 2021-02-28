@@ -110,7 +110,7 @@
                         <outlet property="delegate" destination="Voe-Tx-rLC" id="PrD-fu-P6m"/>
                     </connections>
                 </application>
-                <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModule="White_Board" customModuleProvider="target"/>
+                <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModule="WhiteBoard" customModuleProvider="target"/>
                 <customObject id="YLy-65-1bz" customClass="NSFontManager"/>
                 <customObject id="Ady-hI-5gd" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
@@ -141,15 +141,15 @@
         <!--Initial View Controller-->
         <scene sceneID="hIz-AP-VOD">
             <objects>
-                <viewController id="XfG-lQ-9wD" customClass="InitialViewController" customModule="White_Board" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="XfG-lQ-9wD" customClass="InitialViewController" customModule="WhiteBoard" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" wantsLayer="YES" id="m2S-Jp-Qdl">
                         <rect key="frame" x="0.0" y="0.0" width="960" height="540"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
-                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="lae-Mr-MMo" customClass="PaletteView" customModule="White_Board" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="0.0" width="200" height="540"/>
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="lae-Mr-MMo" customClass="PaletteView" customModule="WhiteBoard" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="0.0" width="224" height="540"/>
                                 <constraints>
-                                    <constraint firstAttribute="width" constant="200" id="2dQ-eR-uJV"/>
+                                    <constraint firstAttribute="width" constant="224" id="2dQ-eR-uJV"/>
                                 </constraints>
                                 <userDefinedRuntimeAttributes>
                                     <userDefinedRuntimeAttribute type="color" keyPath="backgroundColor">
@@ -157,8 +157,8 @@
                                     </userDefinedRuntimeAttribute>
                                 </userDefinedRuntimeAttributes>
                             </customView>
-                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="2ua-TR-vSJ" customClass="DrawView" customModule="White_Board" customModuleProvider="target">
-                                <rect key="frame" x="200" y="0.0" width="760" height="540"/>
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="2ua-TR-vSJ" customClass="DrawView" customModule="WhiteBoard" customModuleProvider="target">
+                                <rect key="frame" x="224" y="0.0" width="736" height="540"/>
                                 <userDefinedRuntimeAttributes>
                                     <userDefinedRuntimeAttribute type="color" keyPath="backgroundColor">
                                         <color key="value" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
@@ -184,6 +184,62 @@
                 <customObject id="rPt-NT-nkU" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="58" y="965"/>
+        </scene>
+        <!--Window Controller-->
+        <scene sceneID="jfc-zT-cU0">
+            <objects>
+                <windowController id="Biq-l3-OpV" sceneMemberID="viewController">
+                    <window key="window" title="Window" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" frameAutosaveName="" animationBehavior="default" id="vEs-qI-DNd">
+                        <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
+                        <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
+                        <rect key="contentRect" x="196" y="249" width="480" height="270"/>
+                        <rect key="screenRect" x="0.0" y="0.0" width="1440" height="900"/>
+                        <value key="minSize" type="size" width="480" height="270"/>
+                        <value key="maxSize" type="size" width="480" height="270"/>
+                        <view key="contentView" id="euO-Eo-YOY">
+                            <rect key="frame" x="0.0" y="0.0" width="480" height="270"/>
+                            <autoresizingMask key="autoresizingMask"/>
+                        </view>
+                        <connections>
+                            <outlet property="delegate" destination="Biq-l3-OpV" id="4dD-t4-waJ"/>
+                        </connections>
+                    </window>
+                    <connections>
+                        <segue destination="m5d-3X-gck" kind="relationship" relationship="window.shadowedContentViewController" id="ULJ-pj-CsA"/>
+                    </connections>
+                </windowController>
+                <customObject id="axO-eT-bn9" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="897" y="893"/>
+        </scene>
+        <!--View Controller-->
+        <scene sceneID="JzX-3o-FnO">
+            <objects>
+                <viewController id="m5d-3X-gck" sceneMemberID="viewController">
+                    <view key="view" id="OZf-EP-vSx">
+                        <rect key="frame" x="0.0" y="0.0" width="480" height="270"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <subviews>
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="tzc-Kh-QMC" customClass="TestView" customModule="WhiteBoard" customModuleProvider="target">
+                                <rect key="frame" x="20" y="20" width="440" height="230"/>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="color" keyPath="backgroundColor">
+                                        <color key="value" red="0.1529411765" green="0.57254901960000004" blue="0.76470588240000004" alpha="1" colorSpace="calibratedRGB"/>
+                                    </userDefinedRuntimeAttribute>
+                                </userDefinedRuntimeAttributes>
+                            </customView>
+                        </subviews>
+                        <constraints>
+                            <constraint firstAttribute="trailing" secondItem="tzc-Kh-QMC" secondAttribute="trailing" constant="20" id="Q5b-kA-Li9"/>
+                            <constraint firstAttribute="bottom" secondItem="tzc-Kh-QMC" secondAttribute="bottom" constant="20" id="TWM-2u-k4w"/>
+                            <constraint firstItem="tzc-Kh-QMC" firstAttribute="leading" secondItem="OZf-EP-vSx" secondAttribute="leading" constant="20" id="dLN-xR-c3a"/>
+                            <constraint firstItem="tzc-Kh-QMC" firstAttribute="top" secondItem="OZf-EP-vSx" secondAttribute="top" constant="20" id="yS9-AD-OJM"/>
+                        </constraints>
+                    </view>
+                </viewController>
+                <customObject id="hBN-ww-730" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="897" y="1253"/>
         </scene>
     </scenes>
 </document>
