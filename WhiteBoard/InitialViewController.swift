@@ -7,10 +7,11 @@
 
 import Cocoa
 
-class InitialViewController: NSViewController, PaletteViewDelegate, InitialViewControllerDelegate {
+class InitialViewController: NSViewController, PaletteViewDelegate, InitialViewControllerDelegate, NSWindowDelegate {
 
     @IBOutlet weak var drawView: DrawView!
     @IBOutlet weak var paletteVIew: PaletteView!
+    var initialWindow: NSWindow?
     
     override func viewDidLoad() {
         paletteVIew.delegate = self
@@ -18,7 +19,21 @@ class InitialViewController: NSViewController, PaletteViewDelegate, InitialViewC
             appDelegate.initialViewControllerDelegate = self
         }
     }
-
+    
+    var originalWindowFrame: NSRect = .zero
+    
+    override func viewWillAppear() {
+        initialWindow = self.view.window
+        initialWindow?.delegate = self
+        originalWindowFrame = initialWindow!.frame
+    }
+    
+    func windowDidResize(_ notification: Notification) {
+        let diffY = initialWindow!.frame.height - originalWindowFrame.height
+        drawView.windowResize(diffY: diffY)
+        originalWindowFrame = initialWindow!.frame
+    }
+    
     func addImage() {
         drawView.addImage()
     }
@@ -33,6 +48,22 @@ class InitialViewController: NSViewController, PaletteViewDelegate, InitialViewC
     
     func addLabel(text: String) {
         drawView.addlabel(text: text)
+    }
+    
+    func copyView() {
+        drawView.copyView(removeTargetView: false)
+    }
+    
+    func cutView() {
+        drawView.copyView(removeTargetView: true)
+    }
+    
+    func pasteView() {
+        drawView.pasteView()
+    }
+    
+    func delete() {
+        drawView.delete()
     }
     
     func undo() {

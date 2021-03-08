@@ -53,14 +53,39 @@
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="Edit" id="W48-6f-4Dl">
                                     <items>
-                                        <menuItem title="Undo" keyEquivalent="z" id="dRJ-4n-Yzg">
+                                        <menuItem title="Undo" keyEquivalent="z" id="Qdn-y4-kDT">
                                             <connections>
-                                                <action selector="undo:" target="Voe-Tx-rLC" id="Yjl-pb-0T3"/>
+                                                <action selector="undo:" target="Voe-Tx-rLC" id="jbv-nu-cdQ"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem title="Redo" keyEquivalent="Z" id="6dh-zS-Vam">
                                             <connections>
                                                 <action selector="redo:" target="Voe-Tx-rLC" id="d7M-vv-P98"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="ZxY-wA-Z3I"/>
+                                        <menuItem title="Copy" tag="1" keyEquivalent="c" id="nqT-a8-9dS">
+                                            <connections>
+                                                <action selector="copy:" target="Voe-Tx-rLC" id="wpk-Y4-CBi"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Cut" tag="1" keyEquivalent="x" id="6sT-pT-CW8">
+                                            <connections>
+                                                <action selector="cut:" target="Voe-Tx-rLC" id="jIB-tK-6c2"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Paste" keyEquivalent="v" id="ZSt-52-fqi">
+                                            <connections>
+                                                <action selector="paste:" target="Voe-Tx-rLC" id="6Ti-1k-Oxp"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Delete" tag="1" id="dRJ-4n-Yzg">
+                                            <string key="keyEquivalent" base64-UTF8="YES">
+CA
+</string>
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="delete:" target="Voe-Tx-rLC" id="TlU-XQ-Rjf"/>
                                             </connections>
                                         </menuItem>
                                     </items>
@@ -125,7 +150,7 @@
                         <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
                         <rect key="contentRect" x="196" y="240" width="960" height="540"/>
                         <rect key="screenRect" x="0.0" y="0.0" width="1440" height="900"/>
-                        <value key="minSize" type="size" width="400" height="500"/>
+                        <value key="minSize" type="size" width="400" height="560"/>
                         <connections>
                             <outlet property="delegate" destination="B8D-0N-5wS" id="98r-iN-zZc"/>
                         </connections>
@@ -170,7 +195,7 @@
                             <constraint firstAttribute="trailing" secondItem="2ua-TR-vSJ" secondAttribute="trailing" id="0B3-Lf-wsM"/>
                             <constraint firstItem="2ua-TR-vSJ" firstAttribute="leading" secondItem="lae-Mr-MMo" secondAttribute="trailing" id="ALg-XE-7oJ"/>
                             <constraint firstItem="lae-Mr-MMo" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" id="DLM-wV-9XX"/>
-                            <constraint firstAttribute="bottom" secondItem="2ua-TR-vSJ" secondAttribute="bottom" id="FV4-ku-5nC"/>
+                            <constraint firstAttribute="bottom" secondItem="2ua-TR-vSJ" secondAttribute="bottom" priority="250" id="Omg-lE-63u"/>
                             <constraint firstItem="2ua-TR-vSJ" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" id="mhx-Ow-rJo"/>
                             <constraint firstAttribute="bottom" secondItem="lae-Mr-MMo" secondAttribute="bottom" id="tzi-z0-aYg"/>
                             <constraint firstItem="lae-Mr-MMo" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" id="wgV-FX-YRf"/>
@@ -212,30 +237,52 @@
             </objects>
             <point key="canvasLocation" x="897" y="893"/>
         </scene>
-        <!--View Controller-->
+        <!--Test View Controller-->
         <scene sceneID="JzX-3o-FnO">
             <objects>
-                <viewController id="m5d-3X-gck" sceneMemberID="viewController">
+                <viewController id="m5d-3X-gck" customClass="TestViewController" customModule="WhiteBoard" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="OZf-EP-vSx">
                         <rect key="frame" x="0.0" y="0.0" width="480" height="270"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
-                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="tzc-Kh-QMC" customClass="TestView" customModule="WhiteBoard" customModuleProvider="target">
-                                <rect key="frame" x="20" y="20" width="440" height="230"/>
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="TJp-MZ-Kmu" customClass="ClickView" customModule="WhiteBoard" customModuleProvider="target">
+                                <rect key="frame" x="280" y="70" width="150" height="100"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="100" id="JaB-MV-X3M"/>
+                                    <constraint firstAttribute="width" constant="150" id="wWQ-Dq-XiR"/>
+                                </constraints>
                                 <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="color" keyPath="backgroundColor">
-                                        <color key="value" red="0.1529411765" green="0.57254901960000004" blue="0.76470588240000004" alpha="1" colorSpace="calibratedRGB"/>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="borderWidth">
+                                        <real key="value" value="0.0"/>
                                     </userDefinedRuntimeAttribute>
                                 </userDefinedRuntimeAttributes>
                             </customView>
+                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="hSB-PX-58h">
+                                <rect key="frame" x="93" y="143" width="76" height="32"/>
+                                <buttonCell key="cell" type="push" title="Button" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="BVK-nU-RHl">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="clickButton:" target="m5d-3X-gck" id="1H1-H6-vhF"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <constraints>
-                            <constraint firstAttribute="trailing" secondItem="tzc-Kh-QMC" secondAttribute="trailing" constant="20" id="Q5b-kA-Li9"/>
-                            <constraint firstAttribute="bottom" secondItem="tzc-Kh-QMC" secondAttribute="bottom" constant="20" id="TWM-2u-k4w"/>
-                            <constraint firstItem="tzc-Kh-QMC" firstAttribute="leading" secondItem="OZf-EP-vSx" secondAttribute="leading" constant="20" id="dLN-xR-c3a"/>
-                            <constraint firstItem="tzc-Kh-QMC" firstAttribute="top" secondItem="OZf-EP-vSx" secondAttribute="top" constant="20" id="yS9-AD-OJM"/>
+                            <constraint firstItem="hSB-PX-58h" firstAttribute="top" secondItem="OZf-EP-vSx" secondAttribute="top" constant="100" id="Cca-mm-5X4"/>
+                            <constraint firstItem="TJp-MZ-Kmu" firstAttribute="top" secondItem="OZf-EP-vSx" secondAttribute="top" constant="100" id="cVq-fi-4yX"/>
+                            <constraint firstItem="hSB-PX-58h" firstAttribute="leading" secondItem="OZf-EP-vSx" secondAttribute="leading" constant="100" id="r3B-xF-S1W"/>
+                            <constraint firstAttribute="trailing" secondItem="TJp-MZ-Kmu" secondAttribute="trailing" constant="50" id="uCC-bw-qih"/>
                         </constraints>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="color" keyPath="backgroundColor">
+                                <color key="value" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            </userDefinedRuntimeAttribute>
+                        </userDefinedRuntimeAttributes>
                     </view>
+                    <connections>
+                        <outlet property="asdfView" destination="TJp-MZ-Kmu" id="a73-cd-2sE"/>
+                    </connections>
                 </viewController>
                 <customObject id="hBN-ww-730" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>

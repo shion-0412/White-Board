@@ -17,6 +17,8 @@
 /* Class = "NSMenuItem"; title = "Redo"; ObjectID = "6dh-zS-Vam"; */
 "6dh-zS-Vam.title" = "やり直す";
 
+"Qdn-y4-kDT.title" = "元に戻す";
+
 /* Class = "NSMenu"; title = "Main Menu"; ObjectID = "AYu-sK-qS6"; */
 "AYu-sK-qS6.title" = "Main Menu";
 
@@ -60,10 +62,14 @@
 "dMs-cI-mzQ.title" = "ファイル";
 
 /* Class = "NSMenuItem"; title = "Undo"; ObjectID = "dRJ-4n-Yzg"; */
-"dRJ-4n-Yzg.title" = "元に戻す";
+"dRJ-4n-Yzg.title" = "削除";
 
 /* Class = "NSMenuItem"; title = "Save As PNG"; ObjectID = "pxx-59-PXV"; */
 "pxx-59-PXV.title" = "PNGで保存";
 
 /* Class = "NSMenu"; title = "justpaint"; ObjectID = "uQy-DD-JDr"; */
 "uQy-DD-JDr.title" = "justpaint";
+
+"nqT-a8-9dS.title" = "コピー";
+"6sT-pT-CW8.title" = "切り取り";
+"ZSt-52-fqi.title" = "貼り付け";

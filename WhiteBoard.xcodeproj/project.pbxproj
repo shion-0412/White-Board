@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0515057225F39BF900E78AB7 /* TestViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05AD79EE25F39B3F0064EFA4 /* TestViewController.swift */; };
 		05358C1925CFD2D700D4537E /* PaletteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05358C1825CFD2D700D4537E /* PaletteView.swift */; };
 		05358C1F25CFDBBA00D4537E /* DrawView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05358C1E25CFDBBA00D4537E /* DrawView.swift */; };
 		05358C2725D1506B00D4537E /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05358C2625D1506B00D4537E /* Extensions.swift */; };
@@ -59,6 +60,7 @@
 		0593772125C9741D003F18A9 /* white-boardUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "white-boardUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		0593772525C9741D003F18A9 /* WhiteBoardUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhiteBoardUITests.swift; sourceTree = "<group>"; };
 		0593772725C9741D003F18A9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		05AD79EE25F39B3F0064EFA4 /* TestViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestViewController.swift; sourceTree = "<group>"; };
 		05B3D6F425D7A4ED008A6859 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Main.strings; sourceTree = "<group>"; };
 		05B3D6F925D7A73C008A6859 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/PaletteView.xib; sourceTree = "<group>"; };
 		05B3D6FC25D7A742008A6859 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/PaletteView.strings; sourceTree = "<group>"; };
@@ -90,6 +92,25 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0587C8F325F6111800F3214C /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				058EF8BA25EA4F2200BBCEE9 /* HotKey.swift */,
+				05358C2625D1506B00D4537E /* Extensions.swift */,
+				056DABA525E7AFA300E3F46E /* Localizable.strings */,
+			);
+			path = Config;
+			sourceTree = "<group>";
+		};
+		0587C8F425F6113000F3214C /* Test */ = {
+			isa = PBXGroup;
+			children = (
+				05F6BB4125EB73E100ACC92C /* TestView.swift */,
+				05AD79EE25F39B3F0064EFA4 /* TestViewController.swift */,
+			);
+			path = Test;
+			sourceTree = "<group>";
+		};
 		059376FB25C97418003F18A9 = {
 			isa = PBXGroup;
 			children = (
@@ -113,15 +134,13 @@
 		0593770625C97418003F18A9 /* WhiteBoard */ = {
 			isa = PBXGroup;
 			children = (
-				056DABA525E7AFA300E3F46E /* Localizable.strings */,
+				0587C8F425F6113000F3214C /* Test */,
+				0587C8F325F6111800F3214C /* Config */,
 				0593770725C97418003F18A9 /* AppDelegate.swift */,
 				0593770925C97418003F18A9 /* InitialViewController.swift */,
 				05358C1E25CFDBBA00D4537E /* DrawView.swift */,
 				05B3D6FA25D7A73C008A6859 /* PaletteView.xib */,
 				05358C1825CFD2D700D4537E /* PaletteView.swift */,
-				05358C2625D1506B00D4537E /* Extensions.swift */,
-				058EF8BA25EA4F2200BBCEE9 /* HotKey.swift */,
-				05F6BB4125EB73E100ACC92C /* TestView.swift */,
 				0593770B25C9741C003F18A9 /* Assets.xcassets */,
 				0593770D25C9741C003F18A9 /* Main.storyboard */,
 				0593771025C9741C003F18A9 /* Info.plist */,
@@ -282,6 +301,7 @@
 			files = (
 				05F6BB4525EB756700ACC92C /* TestView.swift in Sources */,
 				05358C2725D1506B00D4537E /* Extensions.swift in Sources */,
+				0515057225F39BF900E78AB7 /* TestViewController.swift in Sources */,
 				0593770A25C97418003F18A9 /* InitialViewController.swift in Sources */,
 				05358C1925CFD2D700D4537E /* PaletteView.swift in Sources */,
 				05358C1F25CFDBBA00D4537E /* DrawView.swift in Sources */,
@@ -475,6 +495,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = WhiteBoard/WhiteBoard.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = T7NP67H8TC;
@@ -484,9 +505,10 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 2.0;
+				MARKETING_VERSION = 3.0;
 				PRODUCT_BUNDLE_IDENTIFIER = engineer.whiteboard;
 				PRODUCT_NAME = WhiteBoard;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -497,6 +519,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = WhiteBoard/WhiteBoard.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = T7NP67H8TC;
@@ -506,9 +529,10 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 2.0;
+				MARKETING_VERSION = 3.0;
 				PRODUCT_BUNDLE_IDENTIFIER = engineer.whiteboard;
 				PRODUCT_NAME = WhiteBoard;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;

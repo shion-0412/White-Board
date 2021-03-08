@@ -10,15 +10,17 @@ import Carbon
 
 var markerCursor: NSCursor = .pointingHand
 var globalColor: NSColor = NSColor.black
-var globalSize: ChoosableSize = .first
+var globalBrushSize: CGFloat = 7.5
+var globalLabelSize: CGFloat = 18
+var globalImageSize: CGFloat = 200
 var shiftKeyIsPressed = false
 var fillsShapes: Bool = false
 var shapeBorderWidth: CGFloat = 5
 var drawingMode: DrawingMode = .marker
-var firstLineWidth: CGFloat = 3
-var secondLineWidth: CGFloat = 7.5
-var thirdLineWidth: CGFloat = 20
-var fourthLineWidth: CGFloat = 80
+//var firstLineWidth: CGFloat = 3
+//var secondLineWidth: CGFloat = 7.5
+//var thirdLineWidth: CGFloat = 20
+//var fourthLineWidth: CGFloat = 80
 var firstShapeWidth: CGFloat = 100
 var secondShapeWidth: CGFloat = 150
 var thirdShapeWidth: CGFloat = 200
@@ -34,8 +36,24 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     weak var initialViewControllerDelegate: InitialViewControllerDelegate?
     var shiftKeyMonitor: Any?
     
+    @IBAction func copy(_ sender: Any) {
+        initialViewControllerDelegate?.copyView()
+    }
+    
+    @IBAction func cut(_ sender: Any) {
+        initialViewControllerDelegate?.cutView()
+    }
+    
+    @IBAction func paste(_ sender: Any) {
+        initialViewControllerDelegate?.pasteView()
+    }
+    
     @IBAction func undo(_ sender: Any) {
         initialViewControllerDelegate?.undo()
+    }
+    
+    @IBAction func delete(_ sender: Any) {
+        initialViewControllerDelegate?.delete()
     }
     
     @IBAction func redo(_ sender: Any) {
@@ -73,5 +91,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 protocol InitialViewControllerDelegate: class {
     func undo()
     func redo()
+    func delete()
+    func copyView()
+    func cutView()
+    func pasteView()
     func saveAsPng()
 }

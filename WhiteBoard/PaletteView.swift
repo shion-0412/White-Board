@@ -22,7 +22,12 @@ class PaletteView: NSView, ChoosableShapeDelegate, ChoosableSizeDelegate, Choosa
     @IBOutlet weak var secondColorView: ChoosableColorView!
     @IBOutlet weak var thirdColorView: ChoosableColorView!
     @IBOutlet weak var fourthColorView: ChoosableColorView!
+    @IBOutlet weak var fifthColorView: ChoosableColorView!
     @IBOutlet weak var labelTextField: NSTextField!
+    @IBOutlet weak var sizeTextField: NSTextField!
+    @IBOutlet weak var stepper: NSStepper!
+    @IBOutlet weak var widthTextField: NSTextField!
+    @IBOutlet weak var widthStepper: NSStepper!
     
     weak var delegate: PaletteViewDelegate?
     
@@ -35,7 +40,7 @@ class PaletteView: NSView, ChoosableShapeDelegate, ChoosableSizeDelegate, Choosa
         super.init(coder: decoder)
         setup()
     }
-
+    
     private func setup() {
         let myName = type(of: self).className().components(separatedBy: ".").last!
         if let nib = NSNib(nibNamed: myName, bundle: Bundle(for: type(of: self))) {
@@ -53,13 +58,13 @@ class PaletteView: NSView, ChoosableShapeDelegate, ChoosableSizeDelegate, Choosa
         } else {
             Swift.print("init couldn't load nib")
         }
-        firstSizeView.ChoosableSize = .first
+        firstSizeView.choosableSize = .first
         firstSizeView.delegate = self
-        secondSizeView.ChoosableSize = .second
+        secondSizeView.choosableSize = .second
         secondSizeView.delegate = self
-        thirdSizeView.ChoosableSize = .third
+        thirdSizeView.choosableSize = .third
         thirdSizeView.delegate = self
-        fourthSizeView.ChoosableSize = .fourth
+        fourthSizeView.choosableSize = .fourth
         fourthSizeView.delegate = self
         squareShapeView.shapeType = .square
         squareShapeView.delegate = self
@@ -77,7 +82,11 @@ class PaletteView: NSView, ChoosableShapeDelegate, ChoosableSizeDelegate, Choosa
         thirdColorView.order = .third
         fourthColorView.delegate = self
         fourthColorView.order = .fourth
+        fifthColorView.delegate = self
+        fifthColorView.order = .fifth
         labelTextField.delegate = self
+        sizeTextField.delegate = self
+        widthTextField.delegate = self
     }
     
     override func draw(_ dirtyRect: NSRect) {
@@ -93,6 +102,22 @@ class PaletteView: NSView, ChoosableShapeDelegate, ChoosableSizeDelegate, Choosa
             fillsShapes = true
         } else {
             fillsShapes = false
+        }
+    }
+    
+    @IBAction func clickStepper(_ sender: NSStepper) {
+        let newSizeValue = stepper.stringValue
+        sizeTextField.stringValue = newSizeValue
+        if let number = NumberFormatter().number(from: newSizeValue) {
+            globalLabelSize = CGFloat(truncating: number)
+        }
+    }
+    
+    @IBAction func clickWidthStepper(_ sender: NSStepper) {
+        let newSizeValue = widthStepper.stringValue
+        widthTextField.stringValue = newSizeValue
+        if let number = NumberFormatter().number(from: newSizeValue) {
+            globalImageSize = CGFloat(truncating: number)
         }
     }
     
@@ -118,6 +143,7 @@ class PaletteView: NSView, ChoosableShapeDelegate, ChoosableSizeDelegate, Choosa
                 $0!.borderWidth = 0
             }
         }
+        changeBrush(type: .other)
     }
     
     func changeColor(order: ChoosableColorOrder) {
@@ -125,44 +151,76 @@ class PaletteView: NSView, ChoosableShapeDelegate, ChoosableSizeDelegate, Choosa
         secondColorView.borderColor = .black
         thirdColorView.borderColor = .black
         fourthColorView.borderColor = .black
+        fifthColorView.borderColor = .black
         switch order {
         case .first:
             firstColorView.borderColor = .green
-            if let image = NSImage(named: "white") {
-                markerCursor = NSCursor(image: image, hotSpot: NSPoint(x: 7, y: 42))
-            }
         case .second:
             secondColorView.borderColor = .green
-            if let image = NSImage(named: "black") {
-                markerCursor = NSCursor(image: image, hotSpot: NSPoint(x: 7, y: 42))
-            }
         case .third:
             thirdColorView.borderColor = .green
-            if let image = NSImage(named: "red") {
-                markerCursor = NSCursor(image: image, hotSpot: NSPoint(x: 7, y: 42))
-            }
         case .fourth:
             fourthColorView.borderColor = .green
-            if let image = NSImage(named: "blue") {
-                markerCursor = NSCursor(image: image, hotSpot: NSPoint(x: 7, y: 42))
-            }
+        case .fifth:
+            fifthColorView.borderColor = .green
         }
     }
     
-    func changeWidth(type: ChoosableSize) {
+    func changeBrush(type: ChoosableSize) {
         firstSizeView.borderWidth = 0
         secondSizeView.borderWidth = 0
         thirdSizeView.borderWidth = 0
         fourthSizeView.borderWidth = 0
         switch type {
         case .first:
+            changeDrawingMode(type: .marker)
             firstSizeView.borderWidth = 1
         case .second:
+            changeDrawingMode(type: .marker)
             secondSizeView.borderWidth = 1
         case .third:
+            changeDrawingMode(type: .marker)
             thirdSizeView.borderWidth = 1
         case .fourth:
+            changeDrawingMode(type: .marker)
             fourthSizeView.borderWidth = 1
+        case .other:
+            break
+        }
+    }
+    
+    func controlTextDidEndEditing(_ obj: Notification) {
+        guard let textField = obj.object as? NSTextField else { return }
+        let newSizeValue = textField.stringValue.replacingOccurrences(of: ",", with: "")
+        guard let number = NumberFormatter().number(from: newSizeValue) else { return }
+        var newSize = CGFloat(truncating: number)
+        if sizeTextField.identifier ==  textField.identifier {
+            let minSize = CGFloat(stepper.minValue)
+            let maxSize = CGFloat(stepper.maxValue)
+            if newSize < minSize {
+                sizeTextField.stringValue = minSize.description
+                newSize = minSize
+            }
+            if maxSize < newSize {
+                sizeTextField.stringValue = maxSize.description
+                newSize = maxSize
+            }
+            stepper.stringValue = newSize.description
+            globalLabelSize = newSize
+        } else if widthTextField.identifier ==
+                    textField.identifier {
+            let minSize = CGFloat(widthStepper.minValue)
+            let maxSize = CGFloat(widthStepper.maxValue)
+            if newSize < minSize {
+                widthTextField.stringValue = minSize.description
+                newSize = minSize
+            }
+            if maxSize < newSize {
+                widthTextField.stringValue = maxSize.description
+                newSize = maxSize
+            }
+            widthStepper.stringValue = newSize.description
+            globalImageSize = newSize
         }
     }
     
@@ -208,22 +266,34 @@ enum ChoosableColorOrder {
     case second
     case third
     case fourth
+    case fifth
 }
 
 class ChoosableSizeView: NSView {
     
-    var ChoosableSize: ChoosableSize = .first
+    var choosableSize: ChoosableSize = .first
     weak var delegate: ChoosableSizeDelegate?
     
     override func mouseDown(with event: NSEvent) {
-        globalSize = ChoosableSize
+        switch choosableSize {
+        case .first:
+            globalBrushSize = 3
+        case .second:
+            globalBrushSize = 7.5
+        case .third:
+            globalBrushSize = 20
+        case .fourth:
+            globalBrushSize = 80
+        default:
+            break
+        }
         self.borderWidth = 1
-        delegate?.changeWidth(type: ChoosableSize)
+        delegate?.changeBrush(type: choosableSize)
     }
 }
 
 protocol ChoosableSizeDelegate: class {
-    func changeWidth(type: ChoosableSize)
+    func changeBrush(type: ChoosableSize)
 }
 
 enum ChoosableSize {
@@ -231,6 +301,7 @@ enum ChoosableSize {
     case second
     case third
     case fourth
+    case other
 }
 
 class ChoosableShapeView: NSView {
@@ -271,7 +342,7 @@ class ChoosableShapeView: NSView {
             path.line(to: NSPoint(x: range, y: range))
             path.lineWidth = lineWidth
             path.stroke()
-        case .marker:
+        default:
             break
         }
     }
@@ -292,4 +363,6 @@ enum DrawingMode {
     case arrow
     case square
     case circle
+    case label
+    case image
 }

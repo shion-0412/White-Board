@@ -59,6 +59,7 @@ extension NSView {
             layer?.cornerRadius = newValue
         }
     }
+    
 }
 
 extension NSBezierPath {
