@@ -13,14 +13,11 @@ var globalColor: NSColor = NSColor.black
 var globalBrushSize: CGFloat = 7.5
 var globalLabelSize: CGFloat = 18
 var globalImageSize: CGFloat = 200
+var globalLineWidth: CGFloat = 7.5
 var shiftKeyIsPressed = false
-var fillsShapes: Bool = false
+var fillsShapes: Bool = true
 var shapeBorderWidth: CGFloat = 5
 var drawingMode: DrawingMode = .marker
-//var firstLineWidth: CGFloat = 3
-//var secondLineWidth: CGFloat = 7.5
-//var thirdLineWidth: CGFloat = 20
-//var fourthLineWidth: CGFloat = 80
 var firstShapeWidth: CGFloat = 100
 var secondShapeWidth: CGFloat = 150
 var thirdShapeWidth: CGFloat = 200
@@ -81,6 +78,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         shiftKeyMonitor = nil
     }
 
+    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+        return true
+    }
+    
     func hotKeyPressed() {
 //        print("pressed ")
     }

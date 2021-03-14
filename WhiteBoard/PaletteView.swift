@@ -23,12 +23,11 @@ class PaletteView: NSView, ChoosableShapeDelegate, ChoosableSizeDelegate, Choosa
     @IBOutlet weak var thirdColorView: ChoosableColorView!
     @IBOutlet weak var fourthColorView: ChoosableColorView!
     @IBOutlet weak var fifthColorView: ChoosableColorView!
-    @IBOutlet weak var labelTextField: NSTextField!
-    @IBOutlet weak var sizeTextField: NSTextField!
-    @IBOutlet weak var stepper: NSStepper!
-    @IBOutlet weak var widthTextField: NSTextField!
+    @IBOutlet weak var labelTextField: WBTextField!
+    @IBOutlet weak var sizeTextField: WBTextField!
+    @IBOutlet weak var sizeStepper: NSStepper!
+    @IBOutlet weak var widthTextField: WBTextField!
     @IBOutlet weak var widthStepper: NSStepper!
-    
     weak var delegate: PaletteViewDelegate?
     
     override init(frame frameRect: NSRect) {
@@ -97,7 +96,13 @@ class PaletteView: NSView, ChoosableShapeDelegate, ChoosableSizeDelegate, Choosa
         super.draw(dirtyRect)
     }
  
+    override func mouseDown(with event: NSEvent) {
+        self.window?.makeFirstResponder(nil)
+        removeSelectedView()
+    }
+    
     @IBAction func switchFill(_ sender: NSButton) {
+        delegate?.removeSelectedView()
         if sender.state == .on {
             fillsShapes = true
         } else {
@@ -105,11 +110,12 @@ class PaletteView: NSView, ChoosableShapeDelegate, ChoosableSizeDelegate, Choosa
         }
     }
     
-    @IBAction func clickStepper(_ sender: NSStepper) {
-        let newSizeValue = stepper.stringValue
+    @IBAction func clickSizeStepper(_ sender: NSStepper) {
+        let newSizeValue = sizeStepper.stringValue
         sizeTextField.stringValue = newSizeValue
         if let number = NumberFormatter().number(from: newSizeValue) {
             globalLabelSize = CGFloat(truncating: number)
+            delegate?.changeLabelSize()
         }
     }
     
@@ -118,32 +124,23 @@ class PaletteView: NSView, ChoosableShapeDelegate, ChoosableSizeDelegate, Choosa
         widthTextField.stringValue = newSizeValue
         if let number = NumberFormatter().number(from: newSizeValue) {
             globalImageSize = CGFloat(truncating: number)
+            delegate?.changeImageSize()
         }
     }
     
     @IBAction func AddImage(_ sender: Any) {
+        delegate?.removeSelectedView()
         delegate?.addImage()
     }
     
     @IBAction func clearCanvas(_ sender: Any) {
+        delegate?.removeSelectedView()
         delegate?.clearCanvas()
     }
     
     @IBAction func createImage(_ sender: Any) {
+        delegate?.removeSelectedView()
         delegate?.createImage()
-    }
-    
-    func changeDrawingMode(type: DrawingMode) {
-        drawingMode = .marker
-        [squareShapeView, circleShapeView, arrowShapeView, lineShapeView].forEach {
-            if $0!.shapeType == type && $0!.borderWidth == 0 {
-                $0!.borderWidth = 1
-                drawingMode = type
-            } else {
-                $0!.borderWidth = 0
-            }
-        }
-        changeBrush(type: .other)
     }
     
     func changeColor(order: ChoosableColorOrder) {
@@ -164,39 +161,58 @@ class PaletteView: NSView, ChoosableShapeDelegate, ChoosableSizeDelegate, Choosa
         case .fifth:
             fifthColorView.borderColor = .green
         }
+        delegate?.changeColor()
+    }
+    
+    func changeDrawingMode(type: DrawingMode) {
+        [firstSizeView,secondSizeView,thirdSizeView,fourthSizeView].forEach {
+            $0!.borderWidth = 0
+        }
+        [squareShapeView, circleShapeView, arrowShapeView, lineShapeView].forEach {
+            if $0!.shapeType == type {
+                if $0!.borderWidth == 0 {
+                    $0!.borderWidth = 1
+                    drawingMode = type
+                } else {
+                    $0!.borderWidth = 0
+                    drawingMode = .none
+                }
+            } else {
+                $0!.borderWidth = 0
+            }
+        }
+        delegate?.removeSelectedView()
     }
     
     func changeBrush(type: ChoosableSize) {
-        firstSizeView.borderWidth = 0
-        secondSizeView.borderWidth = 0
-        thirdSizeView.borderWidth = 0
-        fourthSizeView.borderWidth = 0
-        switch type {
-        case .first:
-            changeDrawingMode(type: .marker)
-            firstSizeView.borderWidth = 1
-        case .second:
-            changeDrawingMode(type: .marker)
-            secondSizeView.borderWidth = 1
-        case .third:
-            changeDrawingMode(type: .marker)
-            thirdSizeView.borderWidth = 1
-        case .fourth:
-            changeDrawingMode(type: .marker)
-            fourthSizeView.borderWidth = 1
-        case .other:
-            break
+        [squareShapeView, circleShapeView, arrowShapeView, lineShapeView].forEach {
+            $0!.borderWidth = 0
         }
+        [firstSizeView,secondSizeView,thirdSizeView,fourthSizeView].forEach {
+            if $0!.choosableSize == type {
+                if $0!.borderWidth == 0 {
+                    $0!.borderWidth = 1
+                    drawingMode = .marker
+                } else {
+                    $0!.borderWidth = 0
+                    drawingMode = .none
+                }
+            } else {
+                $0!.borderWidth = 0
+            }
+        }
+        delegate?.removeSelectedView()
     }
     
     func controlTextDidEndEditing(_ obj: Notification) {
         guard let textField = obj.object as? NSTextField else { return }
+        guard textField.identifier != labelTextField.identifier else { return }
         let newSizeValue = textField.stringValue.replacingOccurrences(of: ",", with: "")
-        guard let number = NumberFormatter().number(from: newSizeValue) else { return }
-        var newSize = CGFloat(truncating: number)
-        if sizeTextField.identifier ==  textField.identifier {
-            let minSize = CGFloat(stepper.minValue)
-            let maxSize = CGFloat(stepper.maxValue)
+        let number = NumberFormatter().number(from: newSizeValue)
+        var newSize = CGFloat(truncating: number!)
+        if textField.identifier == sizeTextField.identifier {
+            let minSize = CGFloat(sizeStepper.minValue)
+            let maxSize = CGFloat(sizeStepper.maxValue)
             if newSize < minSize {
                 sizeTextField.stringValue = minSize.description
                 newSize = minSize
@@ -205,10 +221,10 @@ class PaletteView: NSView, ChoosableShapeDelegate, ChoosableSizeDelegate, Choosa
                 sizeTextField.stringValue = maxSize.description
                 newSize = maxSize
             }
-            stepper.stringValue = newSize.description
+            sizeStepper.stringValue = newSize.description
             globalLabelSize = newSize
-        } else if widthTextField.identifier ==
-                    textField.identifier {
+            delegate?.changeLabelSize()
+        } else if textField.identifier == widthTextField.identifier {
             let minSize = CGFloat(widthStepper.minValue)
             let maxSize = CGFloat(widthStepper.maxValue)
             if newSize < minSize {
@@ -221,11 +237,20 @@ class PaletteView: NSView, ChoosableShapeDelegate, ChoosableSizeDelegate, Choosa
             }
             widthStepper.stringValue = newSize.description
             globalImageSize = newSize
+            delegate?.changeImageSize()
         }
     }
     
     func control(_ control: NSControl, textView: NSTextView, doCommandBy commandSelector: Selector) -> Bool {
         if commandSelector == #selector(NSResponder.insertNewline(_:)) {
+            let sizeTextFieldValue = sizeTextField.stringValue.replacingOccurrences(of: ",", with: "")
+            if NumberFormatter().number(from: sizeTextFieldValue) == nil {
+                sizeTextField.stringValue = sizeStepper.stringValue
+            }
+            let widthTextFieldValue = widthTextField.stringValue.replacingOccurrences(of: ",", with: "")
+            if NumberFormatter().number(from: widthTextFieldValue) == nil {
+                widthTextField.stringValue = widthStepper.stringValue
+            }
             self.window?.makeFirstResponder(nil)
             if self.labelTextField.stringValue != "" {
                 delegate?.addLabel(text: self.labelTextField.stringValue)
@@ -236,6 +261,10 @@ class PaletteView: NSView, ChoosableShapeDelegate, ChoosableSizeDelegate, Choosa
         return false
     }
     
+    func removeSelectedView() {
+        delegate?.removeSelectedView()
+    }
+    
 }
 
 protocol PaletteViewDelegate: class {
@@ -243,6 +272,10 @@ protocol PaletteViewDelegate: class {
     func clearCanvas()
     func createImage()
     func addLabel(text: String)
+    func changeColor()
+    func changeLabelSize()
+    func changeImageSize()
+    func removeSelectedView()
 }
 
 class ChoosableColorView: NSView {
@@ -287,7 +320,6 @@ class ChoosableSizeView: NSView {
         default:
             break
         }
-        self.borderWidth = 1
         delegate?.changeBrush(type: choosableSize)
     }
 }
@@ -365,4 +397,38 @@ enum DrawingMode {
     case circle
     case label
     case image
+    case none
+}
+
+class WBTextField: NSTextField {
+ 
+    private let commandKey = NSEvent.ModifierFlags.command.rawValue
+    private let commandShiftKey = NSEvent.ModifierFlags.command.rawValue | NSEvent.ModifierFlags.shift.rawValue
+    
+    override func performKeyEquivalent(with event: NSEvent) -> Bool {
+        if event.type == NSEvent.EventType.keyDown {
+            if (event.modifierFlags.rawValue & NSEvent.ModifierFlags.deviceIndependentFlagsMask.rawValue) == commandKey {
+                switch event.charactersIgnoringModifiers! {
+                case "x":
+                    if NSApp.sendAction(#selector(NSText.cut(_:)), to:nil, from:self) { return true }
+                case "c":
+                    if NSApp.sendAction(#selector(NSText.copy(_:)), to:nil, from:self) { return true }
+                case "v":
+                    if NSApp.sendAction(#selector(NSText.paste(_:)), to:nil, from:self) { return true }
+                case "z":
+                    if NSApp.sendAction(Selector(("undo:")), to:nil, from:self) { return true }
+                case "a":
+                    if NSApp.sendAction(#selector(NSResponder.selectAll(_:)), to:nil, from:self) { return true }
+                default:
+                    break
+                }
+            } else if (event.modifierFlags.rawValue & NSEvent.ModifierFlags.deviceIndependentFlagsMask.rawValue) == commandShiftKey {
+                if event.charactersIgnoringModifiers == "Z" {
+                    if NSApp.sendAction(Selector(("redo:")), to:nil, from:self) { return true }
+                }
+            }
+        }
+        return super.performKeyEquivalent(with: event)
+    }
+    
 }

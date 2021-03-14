@@ -14,18 +14,18 @@
                 <outlet property="firstSizeView" destination="gwd-2r-Y8Y" id="V70-VG-kaU"/>
                 <outlet property="fourthColorView" destination="Kto-Dr-tNP" id="Uu2-rD-YUo"/>
                 <outlet property="fourthSizeView" destination="nEP-IA-gHw" id="J1g-lH-xvu"/>
-                <outlet property="labelTextField" destination="Hy2-uz-dTj" id="dXy-zw-NYm"/>
+                <outlet property="labelTextField" destination="Hy2-uz-dTj" id="yeL-XX-BjL"/>
                 <outlet property="lineShapeView" destination="WiT-gP-CQu" id="VoW-gq-WT3"/>
                 <outlet property="secondColorView" destination="eBt-um-k6B" id="9Fx-lZ-Ved"/>
                 <outlet property="secondSizeView" destination="6ST-lF-adt" id="oYa-5u-aWK"/>
-                <outlet property="sizeTextField" destination="fy5-Ft-MYM" id="gaF-Mb-Dyj"/>
+                <outlet property="sizeStepper" destination="qRF-Fv-jxF" id="c21-Db-4c0"/>
+                <outlet property="sizeTextField" destination="fy5-Ft-MYM" id="98y-xj-iZ5"/>
                 <outlet property="squareShapeView" destination="3bN-k7-r5b" id="KzS-OX-nJd"/>
-                <outlet property="stepper" destination="qRF-Fv-jxF" id="oEJ-RU-DuM"/>
                 <outlet property="thirdColorView" destination="VBS-4Z-Zq9" id="vn3-NY-j9k"/>
                 <outlet property="thirdSizeView" destination="CGJ-AA-GuI" id="PrS-WJ-x46"/>
                 <outlet property="topView" destination="c22-O7-iKe" id="OG1-Kr-vnX"/>
                 <outlet property="widthStepper" destination="BDr-wO-TLA" id="xxP-M5-VKw"/>
-                <outlet property="widthTextField" destination="gbf-ee-Xim" id="M1h-V6-nWJ"/>
+                <outlet property="widthTextField" destination="gbf-ee-Xim" id="16b-vC-uEh"/>
             </connections>
         </customObject>
         <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
@@ -192,7 +192,7 @@
                                     <color key="value" red="0.0" green="1" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 </userDefinedRuntimeAttribute>
                                 <userDefinedRuntimeAttribute type="number" keyPath="borderWidth">
-                                    <real key="value" value="1"/>
+                                    <real key="value" value="0.0"/>
                                 </userDefinedRuntimeAttribute>
                             </userDefinedRuntimeAttributes>
                         </customView>
@@ -224,6 +224,9 @@
                             <userDefinedRuntimeAttributes>
                                 <userDefinedRuntimeAttribute type="color" keyPath="borderColor">
                                     <color key="value" red="0.0" green="1" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                </userDefinedRuntimeAttribute>
+                                <userDefinedRuntimeAttribute type="number" keyPath="borderWidth">
+                                    <real key="value" value="1"/>
                                 </userDefinedRuntimeAttribute>
                             </userDefinedRuntimeAttributes>
                         </customView>
@@ -428,7 +431,7 @@
                         <action selector="createImage:" target="-2" id="gch-pD-hYL"/>
                     </connections>
                 </button>
-                <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Hy2-uz-dTj">
+                <textField identifier="labelTextField" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Hy2-uz-dTj" customClass="WBTextField" customModule="WhiteBoard" customModuleProvider="target">
                     <rect key="frame" x="51" y="238" width="153" height="21"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" refusesFirstResponder="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" placeholderString="Press Enter to add lael" drawsBackground="YES" id="rXw-QZ-VOM">
                         <font key="font" metaFont="system"/>
@@ -438,7 +441,7 @@
                 </textField>
                 <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="EyT-K4-OzO">
                     <rect key="frame" x="18" y="467" width="107" height="18"/>
-                    <buttonCell key="cell" type="check" title="Fill the shape" bezelStyle="regularSquare" imagePosition="left" inset="2" id="uIR-dG-jtF">
+                    <buttonCell key="cell" type="check" title="Fill the shape" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="uIR-dG-jtF">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                         <font key="font" metaFont="system"/>
                     </buttonCell>
@@ -456,7 +459,7 @@
                         <action selector="clearCanvas:" target="-2" id="on1-PV-wQ6"/>
                     </connections>
                 </button>
-                <textField identifier="sizeTextField" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="fy5-Ft-MYM">
+                <textField identifier="sizeTextField" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="fy5-Ft-MYM" customClass="WBTextField" customModule="WhiteBoard" customModuleProvider="target">
                     <rect key="frame" x="51" y="264" width="50" height="21"/>
                     <constraints>
                         <constraint firstAttribute="width" constant="50" id="0NS-Vs-sJV"/>
@@ -472,7 +475,7 @@
                     <rect key="frame" x="100" y="260" width="19" height="28"/>
                     <stepperCell key="cell" continuous="YES" alignment="left" minValue="8" maxValue="100" doubleValue="18" id="oq6-F4-jRj"/>
                     <connections>
-                        <action selector="clickStepper:" target="-2" id="70f-LD-G5E"/>
+                        <action selector="clickSizeStepper:" target="-2" id="88A-Tj-Amr"/>
                     </connections>
                 </stepper>
                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="Icl-we-wgh">
@@ -491,7 +494,7 @@
                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <textField identifier="widthTextField" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="gbf-ee-Xim">
+                <textField identifier="widthTextField" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="gbf-ee-Xim" customClass="WBTextField" customModule="WhiteBoard" customModuleProvider="target">
                     <rect key="frame" x="61" y="168" width="50" height="21"/>
                     <constraints>
                         <constraint firstAttribute="width" constant="50" id="zFZ-wW-ZMf"/>

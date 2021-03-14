@@ -16,12 +16,10 @@ class DrawView: NSView {
     private var trackingArea: NSTrackingArea?
     var subviewDics = [[String:Any]]()
     var lastSubviewDics = [[String:Any]]()
-    var targetView: NSView?
-    var targetViewExist = false
-    var targetViewIndex: Int = 0
-    var originalPoint: NSPoint?
-    var temporaryDiffX: CGFloat = 0
-    var temporaryDiffY: CGFloat = 0
+    var selectedView: NSView?
+    var selectedViewIndex: Int = 0
+    var selectedViewOriginalPoint: NSPoint?
+    var temporaryOriginalLocaionForMarker: NSPoint?
     
     override func draw(_ dirtyRect: NSRect) {
         NSColor.white.setFill()
@@ -38,15 +36,19 @@ class DrawView: NSView {
     }
     
     override func mouseDown(with event: NSEvent) {
+        self.window?.makeFirstResponder(nil)
         let locationInView = NSPoint(x: event.locationInWindow.x - self.frame.origin.x, y: event.locationInWindow.y - 2 * self.frame.origin.y)
-        self.targetView?.borderWidth = 0
-        self.targetViewExist = false
-        self.targetView = nil
+        self.selectedView?.borderWidth = 0
+        self.selectedView = nil
         checkCurrentPoint(locationInView: locationInView)
-        if targetViewExist {
-            originalPoint = event.locationInWindow
+        if self.selectedView != nil {
+            // selectedViewが存在するときは、選択だけしてreturn
+            selectedViewOriginalPoint = event.locationInWindow
+            temporaryOriginalLocaionForMarker = event.locationInWindow
             return
         }
+        //DrawindModeがnoneのときは描画せずリターン
+        guard drawingMode != .none else { return }
         temporaryLinePath = NSBezierPath()
         temporaryLineView = LineView()
         temporaryLineView!.path = temporaryLinePath
@@ -55,27 +57,23 @@ class DrawView: NSView {
         temporaryLineView?.fillsShapes = fillsShapes
         self.addSubviewAndResetRedoArrays(temporaryLineView!)
         behaviorsForUndo.append(.addView)
-        switch drawingMode {
-        case .arrow:
+        if drawingMode == .arrow || drawingMode == .line {
             temporaryLinePath!.lineJoinStyle = .bevel
             temporaryLinePath!.lineCapStyle = .square
-        case .line:
-            temporaryLinePath!.lineJoinStyle = .bevel
-            temporaryLinePath!.lineCapStyle = .square
-        case .square:
+        } else if drawingMode == .square {
             temporaryLinePath!.lineJoinStyle = .miter
             temporaryLinePath!.lineCapStyle = .square
-        default:
+        } else {
             temporaryLinePath!.lineJoinStyle = .round
             temporaryLinePath!.lineCapStyle = .round
         }
-        let lineWidth: CGFloat = (drawingMode == .marker) ? globalBrushSize : 7.5
+        let lineWidth: CGFloat = (drawingMode == .marker) ? globalBrushSize : globalLineWidth
         temporaryLineView?.lineWidth = lineWidth
         temporaryLinePath!.lineWidth = lineWidth
-        if drawingMode != .marker {
-            temporaryLineView?.frame = NSRect(x: locationInView.x, y: locationInView.y, width: 0, height: 0)
-        } else {
+        if drawingMode == .marker || drawingMode == .line || drawingMode == .arrow {
             temporaryLineView?.frame = self.bounds
+        } else {
+            temporaryLineView?.frame = NSRect(x: locationInView.x, y: locationInView.y, width: 0, height: 0)
         }
         temporaryOriginalLocation = locationInView
         temporaryLinePath!.move(to: locationInView)
@@ -84,27 +82,43 @@ class DrawView: NSView {
     }
     
     override func mouseDragged(with event: NSEvent) {
-        if targetViewExist && originalPoint != nil {
+        if selectedView != nil && selectedViewOriginalPoint != nil {
+            // selectedViewをドラッグしているとき
             NSCursor.closedHand.set()
-            let differenceX = event.locationInWindow.x - originalPoint!.x
-            let differenceY = event.locationInWindow.y - originalPoint!.y
-            let rect = targetView!.frame
-            targetView!.frame = NSRect(x: rect.origin.x + differenceX, y: rect.origin.y + differenceY, width: rect.width, height: rect.height)
-            originalPoint = event.locationInWindow
+            let dragDiffX = event.locationInWindow.x - selectedViewOriginalPoint!.x
+            let dragDiffY = event.locationInWindow.y - selectedViewOriginalPoint!.y
+            let dic = subviewDics[selectedViewIndex]
+            if let type = dic["type"] as? DrawingMode, type == .line || type == .arrow {
+                //直線、矢印のときはpathを変形、それ以外はframeを変形
+                let lineView = self.subviews[selectedViewIndex] as! LineView
+                let x = (dic["originX"] as! CGFloat) + dragDiffX
+                let y = (dic["originY"] as! CGFloat) + dragDiffY
+                let diffX = dic["diffX"] as! CGFloat
+                let diffY = dic["diffY"] as! CGFloat
+                drawLinePath(path: lineView.path!,
+                             startPoint: NSPoint(x: x, y: y),
+                             endPoint: NSPoint(x: x + diffX, y: y + diffY),
+                             isArrow: type == .arrow)
+                lineView.needsDisplay = true
+                subviewDics[selectedViewIndex].updateValue(x, forKey: "originX")
+                subviewDics[selectedViewIndex].updateValue(y, forKey: "originY")
+            } else {
+                let rect = selectedView!.frame
+                selectedView!.frame = NSRect(x: rect.origin.x + dragDiffX, y: rect.origin.y + dragDiffY, width: rect.width, height: rect.height)
+            }
+            selectedViewOriginalPoint = event.locationInWindow
             return
         }
+        //selectedViewの移動ではなく、lineViewを描画しているとき
         guard temporaryLinePath != nil else { return }
-//        setCurrentCursor()
         var diffX: CGFloat = 0
         var diffY: CGFloat = 0
-        if drawingMode != .marker {
+        if drawingMode != .marker && drawingMode != .line && drawingMode != .arrow {
             let locationInView = NSPoint(x: event.locationInWindow.x - self.frame.origin.x, y: event.locationInWindow.y - 2 * self.frame.origin.y)
             var rectX = temporaryOriginalLocation!.x
             var rectY = temporaryOriginalLocation!.y
             diffX = locationInView.x - temporaryOriginalLocation!.x
-            temporaryDiffX = diffX
             diffY = locationInView.y - temporaryOriginalLocation!.y
-            temporaryDiffY = diffY
             var rect: NSRect = .zero
             if shiftKeyIsPressed {
                 let width = max(abs(diffX), abs(diffY))
@@ -130,9 +144,9 @@ class DrawView: NSView {
         case .marker:
             drawTemporaryMarker(locationInWindow: event.locationInWindow)
         case .line:
-            drawTemporaryLine(locationInWindow: event.locationInWindow, sameSign: diffX * diffY > 0)
+            drawTemporaryLine(locationInWindow: event.locationInWindow)
         case .arrow:
-            drawTemporaryArrow(locationInWindow: event.locationInWindow, diffX: diffX, diffY: diffY)
+            drawTemporaryArrow(locationInWindow: event.locationInWindow)
         case .square:
             drawTemporarySquare(locationInWindow: event.locationInWindow)
         case .circle:
@@ -144,29 +158,59 @@ class DrawView: NSView {
     
     override func mouseUp(with event: NSEvent) {
         NSCursor.arrow.set()
-        if !targetViewExist && temporaryLineView != nil {
+        if selectedView == nil && temporaryLineView != nil {
+            let locationInView = NSPoint(x: event.locationInWindow.x - self.frame.origin.x, y: event.locationInWindow.y - 2 * self.frame.origin.y)
             var temporaryLineViewDic: [String:Any] = [
                 "type": drawingMode,
                 "index": self.subviews.count - 1,
                 "originX": temporaryLineView!.frame.origin.x,
-                "originY": temporaryLineView!.frame.origin.y,
-                "width": temporaryLineView!.frame.width,
-                "height": temporaryLineView!.frame.height]
+                "originY": temporaryLineView!.frame.origin.y]
             if drawingMode == .line || drawingMode == .arrow {
+                var diffX = locationInView.x - temporaryOriginalLocation!.x
+                var diffY = locationInView.y - temporaryOriginalLocation!.y
+                if shiftKeyIsPressed {
+                    if abs(diffX) < abs(diffY) {
+                        diffX = 0
+                    } else {
+                        diffY = 0
+                    }
+                }
+                temporaryLineViewDic.updateValue(temporaryOriginalLocation!.x, forKey: "originX")
+                temporaryLineViewDic.updateValue(temporaryOriginalLocation!.y, forKey: "originY")
                 temporaryLineViewDic.updateValue(temporaryLinePath!.lineWidth / 2, forKey: "lineWidth")
-                temporaryLineViewDic.updateValue(temporaryDiffX, forKey: "diffX")
-                temporaryLineViewDic.updateValue(temporaryDiffY, forKey: "diffY")
+                temporaryLineViewDic.updateValue(diffX, forKey: "diffX")
+                temporaryLineViewDic.updateValue(diffY, forKey: "diffY")
+            } else if drawingMode == .marker {
+                let points = getPoints(path: temporaryLinePath!)
+                temporaryLineViewDic.updateValue(temporaryLinePath!.lineWidth, forKey: "lineWidth")
+                temporaryLineViewDic.updateValue(points, forKey: "points")
+            } else {
+                temporaryLineViewDic.updateValue(temporaryLineView!.frame.width, forKey: "width")
+                temporaryLineViewDic.updateValue(temporaryLineView!.frame.height, forKey: "height")
             }
             subviewDics.append(temporaryLineViewDic)
-        } else if targetViewExist {
-            subviewDics[targetViewIndex].updateValue(targetView!.frame.origin.x, forKey: "originX")
-            subviewDics[targetViewIndex].updateValue(targetView!.frame.origin.y, forKey: "originY")
-            subviewDics[targetViewIndex].updateValue(targetView!.frame.width, forKey: "width")
-            subviewDics[targetViewIndex].updateValue(targetView!.frame.height, forKey: "height")
+        } else if selectedView != nil {
+            let dic = subviewDics[selectedViewIndex]
+            if let type = dic["type"] as? DrawingMode, type != .line && type != .arrow {
+                subviewDics[selectedViewIndex].updateValue(selectedView!.frame.origin.x, forKey: "originX")
+                subviewDics[selectedViewIndex].updateValue(selectedView!.frame.origin.y, forKey: "originY")
+            }
         }
         temporaryLinePath = nil
         temporaryLineView = nil
         temporaryOriginalLocation = nil
+    }
+    
+    func getPoints(path: NSBezierPath) -> [NSPoint] {
+        var points = [NSPoint](repeating: NSPoint.zero, count: 3)
+        var pathPoints = [NSPoint]()
+        for i in 0 ..< path.elementCount {
+            let element = path.element(at: i, associatedPoints: &points)
+            if element == .lineTo {
+                pathPoints.append(points[0])
+            }
+        }
+        return pathPoints
     }
     
     func windowResize(diffY: CGFloat) {
@@ -183,44 +227,89 @@ class DrawView: NSView {
             let index = dic["index"] as! Int
             let originX = dic["originX"] as! CGFloat
             let originY = dic["originY"] as! CGFloat
-            let width = dic["width"] as! CGFloat
-            let height = dic["height"] as! CGFloat
-            let xIsInArea = originX <= locationInView.x && locationInView.x <= originX + width
-            let yIsInArea = originY <= locationInView.y && locationInView.y <= originY + height
             if type == .square || type == .circle || type == .label || type == .image {
+                let width = dic["width"] as! CGFloat
+                let height = dic["height"] as! CGFloat
+                let xIsInArea = originX <= locationInView.x && locationInView.x <= originX + width
+                let yIsInArea = originY <= locationInView.y && locationInView.y <= originY + height
                 if xIsInArea && yIsInArea {
-                    self.targetView = self.subviews[index]
-                    self.targetView?.borderWidth = 2
-                    self.targetView?.borderColor = .green
-                    targetViewExist = true
-                    targetViewIndex = subviewDics.count - 1 - indexOfDic
-                    targetViewType = type
+                    self.selectedView = self.subviews[index]
+                    self.selectedView?.borderWidth = 2
+                    self.selectedView?.borderColor = .green
+                    selectedViewIndex = subviewDics.count - 1 - indexOfDic
+                    selectedViewType = type
+                    return
+                }
+            } else if type == .marker {
+                let points = dic["points"] as! [NSPoint]
+                let lineWidth = dic["lineWidth"] as! CGFloat
+                var markerViewIsSelected = false
+                for i in 0 ..< points.count - 1 {
+                    let startPoint = NSPoint(x: originX + points[i].x, y: originY + points[i].y)
+                    let endPoint = NSPoint(x: originX + points[i+1].x, y: originY + points[i+1].y)
+                    if checkLocationIsNearLine(location: locationInView,
+                                               lineOrigin: startPoint,
+                                               lineDiff: NSPoint(x: endPoint.x - startPoint.x, y: endPoint.y - startPoint.y),
+                                               lineWidth: lineWidth) {
+                        self.selectedView = self.subviews[index]
+                        selectedViewIndex = subviewDics.count - 1 - indexOfDic
+                        selectedViewType = type
+                        markerViewIsSelected = true
+                        return
+                    }
+                }
+                if markerViewIsSelected {
                     return
                 }
             } else if type == .line || type == .arrow {
                 let lineWidth = dic["lineWidth"] as! CGFloat
                 let diffX = dic["diffX"] as! CGFloat
                 let diffY = dic["diffY"] as! CGFloat
-                let x0 = locationInView.x - originX
-                let y0 = locationInView.y - originY
-                let slopeSignIsPositive = diffX * diffY > 0
-                let slope = (height / width) * (slopeSignIsPositive ? 1 : -1)
-                var distance = abs(-1 * slope * x0 + y0) / sqrt(1 + pow(slope, 2))
-                if !slopeSignIsPositive {
-                    distance = abs(-1 * slope * x0 + y0 - height) / sqrt(1 + pow(slope, 2))
-                }
-                if xIsInArea && yIsInArea && distance <= lineWidth {
-                    self.targetView = self.subviews[index]
-                    targetViewExist = true
-                    targetViewIndex = subviewDics.count - 1 - indexOfDic
-                    targetViewType = type
-                    targetViewLineWidth = lineWidth
-                    targetViewDiffX = diffX
-                    targetViewDiffY = diffY
+                if checkLocationIsNearLine(location: locationInView,
+                                           lineOrigin: NSPoint(x: originX, y: originY),
+                                           lineDiff: NSPoint(x: diffX, y: diffY),
+                                           lineWidth: lineWidth) {
+                    self.selectedView = self.subviews[index]
+                    selectedViewIndex = subviewDics.count - 1 - indexOfDic
+                    selectedViewType = type
+                    selectedViewLineWidth = lineWidth
+                    selectedViewDiffX = diffX
+                    selectedViewDiffY = diffY
                     return
                 }
             }
         }
+    }
+    
+    func checkLocationIsNearLine(location: NSPoint, lineOrigin: NSPoint, lineDiff: NSPoint, lineWidth: CGFloat) -> Bool {
+        let diffX = lineDiff.x
+        let diffY = lineDiff.y
+        //直線の開始地点を原点とした時の、locationの座標(x0, y0)
+        let x0 = location.x - lineOrigin.x
+        let y0 = location.y - lineOrigin.y
+        let slopeSignIsPositive = diffX * diffY > 0
+        let slope = (abs(diffY) / abs(diffX)) * (slopeSignIsPositive ? 1 : -1)
+        var distance = abs(-1 * slope * x0 + y0) / sqrt(1 + pow(slope, 2))
+        if diffX == 0 {
+            distance = x0
+        } else if diffY == 0 {
+            distance = y0
+        }
+        let xIsInArea = {() -> Bool in
+            if diffX > 0 {
+                return lineOrigin.x - lineWidth <= location.x && location.x <= lineOrigin.x + diffX + lineWidth
+            } else {
+                return lineOrigin.x + diffX - lineWidth <= location.x && location.x <= lineOrigin.x + lineWidth
+            }
+        }
+        let yIsInArea = {() -> Bool in
+            if diffY > 0 {
+                return lineOrigin.y - lineWidth <= location.y && location.y <= lineOrigin.y + diffY + lineWidth
+            } else {
+                return lineOrigin.y + diffY - lineWidth <= location.y && location.y <= lineOrigin.y + lineWidth
+            }
+        }
+        return xIsInArea() && yIsInArea() && distance <= lineWidth
     }
     
     private func drawTemporaryMarker(locationInWindow: NSPoint) {
@@ -229,58 +318,43 @@ class DrawView: NSView {
         temporaryLineView!.needsDisplay = true
     }
     
-    private func drawTemporaryLine(locationInWindow: NSPoint, sameSign: Bool) {
-        temporaryLinePath?.removeAllPoints()
-        let width = temporaryLineView!.frame.width
-        let height = temporaryLineView!.frame.height
-        let edgeWidth = temporaryLinePath!.lineWidth / sqrt(2)
-        if sameSign {
-            temporaryLinePath!.move(to: NSPoint(x: edgeWidth, y: edgeWidth))
-            temporaryLinePath!.line(to: NSPoint(x: width - edgeWidth, y: height - edgeWidth))
-        } else {
-            temporaryLinePath!.move(to: NSPoint(x: edgeWidth, y: height - edgeWidth))
-            temporaryLinePath!.line(to: NSPoint(x: width - edgeWidth, y: edgeWidth))
-        }
+    private func drawTemporaryLine(locationInWindow: NSPoint) {
+        let locationInView = NSPoint(x: locationInWindow.x - self.frame.origin.x, y: locationInWindow.y - 2 * self.frame.origin.y)
+        drawLinePath(path: temporaryLinePath!, startPoint: temporaryOriginalLocation!, endPoint: locationInView, isArrow: false)
         temporaryLineView!.needsDisplay = true
     }
     
-    private func drawTemporaryArrow(locationInWindow: NSPoint, diffX: CGFloat, diffY: CGFloat) {
-        temporaryLinePath?.removeAllPoints()
-        let width = temporaryLineView!.frame.width
-        let height = temporaryLineView!.frame.height
-        var origin = NSPoint.zero
-        var endPoint = NSPoint.zero
-        let arrowLength: CGFloat = 30
-        let edgeWidth = (temporaryLinePath!.lineWidth / sqrt(2)) + (arrowLength / sqrt(2))
-        if diffX > 0 {
-            if diffY > 0 {
-                origin = NSPoint(x: edgeWidth, y: edgeWidth)
-                endPoint = NSPoint(x: width - edgeWidth, y: height - edgeWidth)
+    private func drawTemporaryArrow(locationInWindow: NSPoint) {
+        let locationInView = NSPoint(x: locationInWindow.x - self.frame.origin.x, y: locationInWindow.y - 2 * self.frame.origin.y)
+        drawLinePath(path: temporaryLinePath!, startPoint: temporaryOriginalLocation!, endPoint: locationInView, isArrow: true)
+        temporaryLineView!.needsDisplay = true
+    }
+    
+    func drawLinePath(path: NSBezierPath, startPoint: NSPoint, endPoint: NSPoint, isArrow: Bool) {
+        path.removeAllPoints()
+        path.move(to: startPoint)
+        var endPoint = endPoint
+        if shiftKeyIsPressed {
+            let diffX = endPoint.x - startPoint.x
+            let diffY = endPoint.y - startPoint.y
+            if abs(diffX) < abs(diffY) {
+                endPoint = NSPoint(x: startPoint.x, y: endPoint.y)
             } else {
-                origin = NSPoint(x: edgeWidth, y: height - edgeWidth)
-                endPoint = NSPoint(x: width - edgeWidth, y: edgeWidth)
-            }
-        } else {
-            if diffY > 0 {
-                origin = NSPoint(x: width - edgeWidth, y: edgeWidth)
-                endPoint = NSPoint(x: edgeWidth, y: height - edgeWidth)
-            } else {
-                origin = NSPoint(x: width - edgeWidth, y: height - edgeWidth)
-                endPoint = NSPoint(x: edgeWidth, y: edgeWidth)
+                endPoint = NSPoint(x: endPoint.x, y: startPoint.y)
             }
         }
-        temporaryLinePath!.move(to: origin)
-        temporaryLinePath!.line(to: endPoint)
-        
-        let radAngle = atan2(endPoint.y - origin.y, endPoint.x - origin.x)
-        let leftAngle = radAngle + (CGFloat.pi * 3 / 4)
-        let rightAngle = radAngle - (CGFloat.pi * 3 / 4)
-        let leftPoint = NSPoint(x: endPoint.x + arrowLength * cos(leftAngle), y: endPoint.y + arrowLength * sin(leftAngle))
-        temporaryLinePath!.line(to: leftPoint)
-        temporaryLinePath!.move(to: endPoint)
-        let rightPoint = NSPoint(x: endPoint.x + arrowLength * cos(rightAngle), y: endPoint.y + arrowLength * sin(rightAngle))
-        temporaryLinePath!.line(to: rightPoint)
-        temporaryLineView!.needsDisplay = true
+        path.line(to: endPoint)
+        if isArrow {
+            let arrowLength: CGFloat = 30
+            let radAngle = atan2(endPoint.y - startPoint.y, endPoint.x - startPoint.x)
+            let leftAngle = radAngle + (CGFloat.pi * 3 / 4)
+            let rightAngle = radAngle - (CGFloat.pi * 3 / 4)
+            let leftPoint = NSPoint(x: endPoint.x + arrowLength * cos(leftAngle), y: endPoint.y + arrowLength * sin(leftAngle))
+            path.line(to: leftPoint)
+            path.move(to: endPoint)
+            let rightPoint = NSPoint(x: endPoint.x + arrowLength * cos(rightAngle), y: endPoint.y + arrowLength * sin(rightAngle))
+            path.line(to: rightPoint)
+        }
     }
     
     private func drawTemporarySquare(locationInWindow: NSPoint) {
@@ -332,6 +406,9 @@ class DrawView: NSView {
                 imageView.image = NSImage(contentsOf: dialog.url!)
                 self.addSubviewAndResetRedoArrays(imageView)
                 self.behaviorsForUndo.append(.addView)
+                self.selectedView?.borderWidth = 0
+                imageView.borderWidth = 2
+                imageView.borderColor = .green
                 let imageViewlDic: [String:Any] = [
                     "type": DrawingMode.image,
                     "index": self.subviews.count - 1,
@@ -353,6 +430,8 @@ class DrawView: NSView {
         self.behaviorsForRedo = []
         self.deletedIndexesForRedo = []
         self.deletedSizeForRedo = []
+        self.selectedView = nil
+        self.selectedViewIndex = 0
         needsDisplay = true
     }
     
@@ -388,6 +467,9 @@ class DrawView: NSView {
         label.frame = NSRect(x: x, y: y, width: width, height: height)
         self.addSubviewAndResetRedoArrays(label)
         behaviorsForUndo.append(.addView)
+        selectedView?.borderWidth = 0
+        label.borderWidth = 2
+        label.borderColor = .green
         let labelDic: [String:Any] = [
             "type": DrawingMode.label,
             "index": self.subviews.count - 1,
@@ -402,35 +484,35 @@ class DrawView: NSView {
     var copiedLineView: LineView?
     var copiedImageView: NSImageView?
     var copiedLabel: NSTextField?
-    var targetViewType: DrawingMode = .square
-    var targetViewLineWidth: CGFloat = 0
-    var targetViewDiffX: CGFloat = 0
-    var targetViewDiffY: CGFloat = 0
+    var selectedViewType: DrawingMode = .square
+    var selectedViewLineWidth: CGFloat = 0
+    var selectedViewDiffX: CGFloat = 0
+    var selectedViewDiffY: CGFloat = 0
     
     func copyView(removeTargetView: Bool) {
-        if targetViewExist && targetView != nil {
-            copiedType = targetViewType
-            if targetViewType == .image {
+        if selectedView != nil {
+            copiedType = selectedViewType
+            if selectedViewType == .image {
                 copiedImageView = NSImageView()
-                copiedImageView!.image = (targetView as! NSImageView).image
+                copiedImageView!.image = (selectedView as! NSImageView).image
                 copiedImageView!.imageScaling = .scaleAxesIndependently
-                copiedImageView!.frame = (targetView as! NSImageView).frame
-            } else if targetViewType == .label {
-                copiedLabel = NSTextField(labelWithString: (targetView as! NSTextField).stringValue)
-                copiedLabel!.textColor = (targetView as! NSTextField).textColor
-                copiedLabel!.font = (targetView as! NSTextField).font
-                copiedLabel!.layer?.backgroundColor = (targetView as! NSTextField).layer?.backgroundColor
-                copiedLabel!.textColor = (targetView as! NSTextField).textColor
+                copiedImageView!.frame = (selectedView as! NSImageView).frame
+            } else if selectedViewType == .label {
+                copiedLabel = NSTextField(labelWithString: (selectedView as! NSTextField).stringValue)
+                copiedLabel!.textColor = (selectedView as! NSTextField).textColor
+                copiedLabel!.font = (selectedView as! NSTextField).font
+                copiedLabel!.layer?.backgroundColor = (selectedView as! NSTextField).layer?.backgroundColor
+                copiedLabel!.textColor = (selectedView as! NSTextField).textColor
                 copiedLabel!.sizeToFit()
-                copiedLabel!.frame = (targetView as! NSTextField).frame
+                copiedLabel!.frame = (selectedView as! NSTextField).frame
             } else {
                 copiedLineView = LineView()
-                copiedLineView!.path = (targetView as! LineView).path
-                copiedLineView!.pathColor = (targetView as! LineView).pathColor
-                copiedLineView!.lineWidth = (targetView as! LineView).lineWidth
+                copiedLineView!.path = (selectedView as! LineView).path
+                copiedLineView!.pathColor = (selectedView as! LineView).pathColor
+                copiedLineView!.lineWidth = (selectedView as! LineView).lineWidth
                 copiedLineView!.drawingMode = copiedType
-                copiedLineView!.fillsShapes = (targetView as! LineView).fillsShapes
-                copiedLineView!.frame = (targetView as! LineView).frame
+                copiedLineView!.fillsShapes = (selectedView as! LineView).fillsShapes
+                copiedLineView!.frame = (selectedView as! LineView).frame
             }
             if removeTargetView {
                 delete()
@@ -499,9 +581,9 @@ class DrawView: NSView {
                 "width": pastedLineView.frame.width,
                 "height": pastedLineView.frame.height]
             if copiedType == .line || copiedType == .arrow {
-                copyDic.updateValue(targetViewLineWidth / 2, forKey: "lineWidth")
-                copyDic.updateValue(targetViewDiffX, forKey: "diffX")
-                copyDic.updateValue(targetViewDiffY, forKey: "diffY")
+                copyDic.updateValue(selectedViewLineWidth / 2, forKey: "lineWidth")
+                copyDic.updateValue(selectedViewDiffX, forKey: "diffX")
+                copyDic.updateValue(selectedViewDiffY, forKey: "diffY")
             }
             subviewDics.append(copyDic)
         }
@@ -516,16 +598,15 @@ class DrawView: NSView {
     var deletedSizeForRedo = [NSSize]()
     
     func delete() {
-        if targetViewExist {
-            let deletedViewSize = targetView!.frame.size
-            targetView!.frame.size = NSSize.zero
+        if selectedView != nil {
+            let deletedViewSize = selectedView!.frame.size
+            selectedView!.frame.size = NSSize.zero
             behaviorsForUndo.append(.deleteView)
-            subviewDics[targetViewIndex].updateValue(CGFloat.zero, forKey: "width")
-            subviewDics[targetViewIndex].updateValue(CGFloat.zero, forKey: "height")
-            deletedIndexesForUndo.append(targetViewIndex)
+            subviewDics[selectedViewIndex].updateValue(CGFloat.zero, forKey: "width")
+            subviewDics[selectedViewIndex].updateValue(CGFloat.zero, forKey: "height")
+            deletedIndexesForUndo.append(selectedViewIndex)
             deletedSizeForUndo.append(deletedViewSize)
-            targetViewExist = false
-            targetView = nil
+            selectedView = nil
         }
     }
     
@@ -583,6 +664,70 @@ class DrawView: NSView {
         }
         
     }
+    
+    func changeColor() {
+        guard selectedView != nil else { return }
+        let selectedDic = subviewDics[selectedViewIndex]
+        guard let type = selectedDic["type"] as? DrawingMode else { return }
+        if type == .label {
+            let labelView = self.subviews[selectedViewIndex] as! NSTextField
+            labelView.textColor = globalColor
+        } else {
+            let lineView = self.subviews[selectedViewIndex] as! LineView
+            lineView.pathColor = globalColor
+            lineView.needsDisplay = true
+        }
+    }
+    
+    func changeLabelSize() {
+        guard selectedView != nil else { return }
+        let selectedDic = subviewDics[selectedViewIndex]
+        guard let type = selectedDic["type"] as? DrawingMode else { return }
+        if type == .label {
+            let label = self.subviews[selectedViewIndex] as! NSTextField
+            label.font = .systemFont(ofSize: globalLabelSize)
+            label.sizeToFit()
+            let width = label.frame.width
+            let height = label.frame.height
+            let x = selectedDic["originX"] as! CGFloat
+            let y = selectedDic["originY"] as! CGFloat
+            label.frame = NSRect(x: x, y: y, width: width, height: height)
+            subviewDics[selectedViewIndex].updateValue(width, forKey: "width")
+            subviewDics[selectedViewIndex].updateValue(height, forKey: "height")
+        }
+    }
+    
+    func changeImageSize() {
+        guard selectedView != nil else { return }
+        let selectedDic = subviewDics[selectedViewIndex]
+        guard let type = selectedDic["type"] as? DrawingMode else { return }
+        if type == .image {
+            let imageView = self.subviews[selectedViewIndex] as! NSImageView
+            let width = selectedDic["width"] as! CGFloat
+            let height = selectedDic["height"] as! CGFloat
+            let x = selectedDic["originX"] as! CGFloat
+            let y = selectedDic["originY"] as! CGFloat
+            let maxLength: CGFloat = globalImageSize
+            let orgSize = NSSize(width: width, height: height)
+            let orgRatio = orgSize.height / orgSize.width
+            var newSize = CGSize.zero
+            if orgSize.width >= orgSize.height {
+                newSize.width = maxLength
+                newSize.height = maxLength * orgRatio
+            } else {
+                newSize.height = maxLength
+                newSize.width = maxLength / orgRatio
+            }
+            imageView.frame = NSRect(x: x, y: y, width: newSize.width, height: newSize.height)
+            subviewDics[selectedViewIndex].updateValue(newSize.width, forKey: "width")
+            subviewDics[selectedViewIndex].updateValue(newSize.height, forKey: "height")
+        }
+    }
+    
+    func removeSelectedView() {
+        self.selectedView?.borderWidth = 0
+        self.selectedView = nil
+    }
 }
 
 class LineView: NSView {
@@ -599,7 +744,7 @@ class LineView: NSView {
             if (self.drawingMode == .square || self.drawingMode == .circle) && self.fillsShapes {
                 path!.fill()
             } else {
-                path!.lineWidth = lineWidth != nil ? lineWidth! : 7.5
+                path!.lineWidth = lineWidth != nil ? lineWidth! : globalLineWidth
                 path!.stroke()
             }
         }

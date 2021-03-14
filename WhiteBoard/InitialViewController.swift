@@ -77,4 +77,20 @@ class InitialViewController: NSViewController, PaletteViewDelegate, InitialViewC
     func saveAsPng() {
         drawView.createImage()
     }
+    
+    func changeColor() {
+        drawView.changeColor()
+    }
+    
+    func changeLabelSize() {
+        drawView.changeLabelSize()
+    }
+    
+    func changeImageSize() {
+        drawView.changeImageSize()
+    }
+    
+    func removeSelectedView() {
+        drawView.removeSelectedView()
+    }
 }
