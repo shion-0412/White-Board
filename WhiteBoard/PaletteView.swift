@@ -86,6 +86,7 @@ class PaletteView: NSView, ChoosableShapeDelegate, ChoosableSizeDelegate, Choosa
         labelTextField.delegate = self
         sizeTextField.delegate = self
         widthTextField.delegate = self
+        globalColor = secondColorView.backgroundColor!
     }
     
     override func draw(_ dirtyRect: NSRect) {
@@ -133,6 +134,10 @@ class PaletteView: NSView, ChoosableShapeDelegate, ChoosableSizeDelegate, Choosa
         delegate?.addImage()
     }
     
+    @IBAction func bringForward(_ sender: Any) {
+        delegate?.bringFront()
+    }
+    
     @IBAction func clearCanvas(_ sender: Any) {
         delegate?.removeSelectedView()
         delegate?.clearCanvas()
@@ -144,6 +149,11 @@ class PaletteView: NSView, ChoosableShapeDelegate, ChoosableSizeDelegate, Choosa
     }
     
     func changeColor(order: ChoosableColorOrder) {
+        setColor(order: order)
+        delegate?.changeColor()
+    }
+    
+    func setColor(order: ChoosableColorOrder) {
         firstColorView.borderColor = .black
         secondColorView.borderColor = .black
         thirdColorView.borderColor = .black
@@ -161,7 +171,6 @@ class PaletteView: NSView, ChoosableShapeDelegate, ChoosableSizeDelegate, Choosa
         case .fifth:
             fifthColorView.borderColor = .green
         }
-        delegate?.changeColor()
     }
     
     func changeDrawingMode(type: DrawingMode) {
@@ -252,9 +261,12 @@ class PaletteView: NSView, ChoosableShapeDelegate, ChoosableSizeDelegate, Choosa
                 widthTextField.stringValue = widthStepper.stringValue
             }
             self.window?.makeFirstResponder(nil)
-            if self.labelTextField.stringValue != "" {
-                delegate?.addLabel(text: self.labelTextField.stringValue)
-                self.labelTextField.stringValue = ""
+            if labelTextFieldIsEditing {
+                delegate?.replaceLabelString(with: self.labelTextField.stringValue)
+            } else {
+                if self.labelTextField.stringValue != "" {
+                    delegate?.addLabel(text: self.labelTextField.stringValue)
+                }
             }
             return true
         }
@@ -265,10 +277,38 @@ class PaletteView: NSView, ChoosableShapeDelegate, ChoosableSizeDelegate, Choosa
         delegate?.removeSelectedView()
     }
     
+    var labelTextFieldIsEditing = false
+    
+    func setLabelString(string: String, size: CGFloat) {
+        labelTextFieldIsEditing = true
+        labelTextField.stringValue = string
+        sizeTextField.stringValue = size.description
+        sizeStepper.stringValue = size.description
+    }
+    
+    func resetLabelString() {
+        labelTextFieldIsEditing = false
+        labelTextField.stringValue = ""
+    }
+    
+    func setImageSize(size: CGFloat) {
+        widthTextField.stringValue = size.description
+        widthStepper.stringValue = size.description
+    }
+    
+    func setCurrentColor(color: NSColor) {
+        [firstColorView,secondColorView,thirdColorView,fourthColorView,fifthColorView].forEach {
+            if $0!.backgroundColor == color {
+                setColor(order: $0!.order)
+                globalColor = color
+            }
+        }
+    }
 }
 
 protocol PaletteViewDelegate: class {
     func addImage()
+    func bringFront()
     func clearCanvas()
     func createImage()
     func addLabel(text: String)
@@ -276,6 +316,7 @@ protocol PaletteViewDelegate: class {
     func changeLabelSize()
     func changeImageSize()
     func removeSelectedView()
+    func replaceLabelString(with: String)
 }
 
 class ChoosableColorView: NSView {
@@ -403,7 +444,6 @@ enum DrawingMode {
 class WBTextField: NSTextField {
  
     private let commandKey = NSEvent.ModifierFlags.command.rawValue
-    private let commandShiftKey = NSEvent.ModifierFlags.command.rawValue | NSEvent.ModifierFlags.shift.rawValue
     
     override func performKeyEquivalent(with event: NSEvent) -> Bool {
         if event.type == NSEvent.EventType.keyDown {
@@ -415,16 +455,10 @@ class WBTextField: NSTextField {
                     if NSApp.sendAction(#selector(NSText.copy(_:)), to:nil, from:self) { return true }
                 case "v":
                     if NSApp.sendAction(#selector(NSText.paste(_:)), to:nil, from:self) { return true }
-                case "z":
-                    if NSApp.sendAction(Selector(("undo:")), to:nil, from:self) { return true }
                 case "a":
                     if NSApp.sendAction(#selector(NSResponder.selectAll(_:)), to:nil, from:self) { return true }
                 default:
                     break
-                }
-            } else if (event.modifierFlags.rawValue & NSEvent.ModifierFlags.deviceIndependentFlagsMask.rawValue) == commandShiftKey {
-                if event.charactersIgnoringModifiers == "Z" {
-                    if NSApp.sendAction(Selector(("redo:")), to:nil, from:self) { return true }
                 }
             }
         }

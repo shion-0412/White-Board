@@ -20,6 +20,7 @@ class DrawView: NSView {
     var selectedViewIndex: Int = 0
     var selectedViewOriginalPoint: NSPoint?
     var temporaryOriginalLocaionForMarker: NSPoint?
+    var delegate: DrawViewDelegate?
     
     override func draw(_ dirtyRect: NSRect) {
         NSColor.white.setFill()
@@ -47,6 +48,7 @@ class DrawView: NSView {
             temporaryOriginalLocaionForMarker = event.locationInWindow
             return
         }
+        delegate?.resetLabelString()
         //DrawindModeがnoneのときは描画せずリターン
         guard drawingMode != .none else { return }
         temporaryLinePath = NSBezierPath()
@@ -182,7 +184,7 @@ class DrawView: NSView {
                 temporaryLineViewDic.updateValue(diffY, forKey: "diffY")
             } else if drawingMode == .marker {
                 let points = getPoints(path: temporaryLinePath!)
-                temporaryLineViewDic.updateValue(temporaryLinePath!.lineWidth, forKey: "lineWidth")
+                temporaryLineViewDic.updateValue(temporaryLinePath!.lineWidth / 2, forKey: "lineWidth")
                 temporaryLineViewDic.updateValue(points, forKey: "points")
             } else {
                 temporaryLineViewDic.updateValue(temporaryLineView!.frame.width, forKey: "width")
@@ -221,6 +223,36 @@ class DrawView: NSView {
         }
     }
     
+    func setSelectedView(view: NSView, index: Int, type: DrawingMode) {
+        self.selectedView?.borderWidth = 0
+        self.selectedView = view
+        self.selectedViewIndex = index
+        self.selectedViewType = type
+        if type != .line && type != .arrow && type != .marker {
+            view.borderWidth = 2
+            view.borderColor = .green
+        }
+        if type == .label {
+            let stringValue = (view as! NSTextField).stringValue
+            let size = subviewDics[index]["size"] as! CGFloat
+            delegate?.setLabelString(string: stringValue, size: size)
+            delegate?.setCurrentColor(color: (view as! NSTextField).textColor!)
+        } else if type == .image {
+            let size = subviewDics[index]["size"] as! CGFloat
+            delegate?.setImageSize(size: size)
+        } else {
+            delegate?.resetLabelString()
+            delegate?.setCurrentColor(color: (view as! LineView).pathColor!)
+        }
+    }
+    
+    func replaceLabelString(with stringValue: String) {
+        if let selectedLabel = selectedView as? NSTextField {
+            selectedLabel.stringValue = stringValue
+            changeLabelSize()
+        }
+    }
+    
     func checkCurrentPoint(locationInView: NSPoint) {
         for (indexOfDic, dic) in subviewDics.reversed().enumerated() {
             let type = dic["type"] as! DrawingMode
@@ -233,30 +265,25 @@ class DrawView: NSView {
                 let xIsInArea = originX <= locationInView.x && locationInView.x <= originX + width
                 let yIsInArea = originY <= locationInView.y && locationInView.y <= originY + height
                 if xIsInArea && yIsInArea {
-                    self.selectedView = self.subviews[index]
-                    self.selectedView?.borderWidth = 2
-                    self.selectedView?.borderColor = .green
-                    selectedViewIndex = subviewDics.count - 1 - indexOfDic
-                    selectedViewType = type
+                    self.setSelectedView(view: self.subviews[index], index: subviewDics.count - 1 - indexOfDic, type: type)
                     return
                 }
             } else if type == .marker {
                 let points = dic["points"] as! [NSPoint]
                 let lineWidth = dic["lineWidth"] as! CGFloat
                 var markerViewIsSelected = false
-                for i in 0 ..< points.count - 1 {
-                    let startPoint = NSPoint(x: originX + points[i].x, y: originY + points[i].y)
-                    let endPoint = NSPoint(x: originX + points[i+1].x, y: originY + points[i+1].y)
+                var startPoint = NSPoint(x: originX + points[0].x, y: originY + points[0].y)
+                for i in 0 ..< points.count {
+                    let endPoint = NSPoint(x: originX + points[i].x, y: originY + points[i].y)
                     if checkLocationIsNearLine(location: locationInView,
                                                lineOrigin: startPoint,
                                                lineDiff: NSPoint(x: endPoint.x - startPoint.x, y: endPoint.y - startPoint.y),
                                                lineWidth: lineWidth) {
-                        self.selectedView = self.subviews[index]
-                        selectedViewIndex = subviewDics.count - 1 - indexOfDic
-                        selectedViewType = type
+                        self.setSelectedView(view: self.subviews[index], index: subviewDics.count - 1 - indexOfDic, type: type)
                         markerViewIsSelected = true
                         return
                     }
+                    startPoint = endPoint
                 }
                 if markerViewIsSelected {
                     return
@@ -269,12 +296,7 @@ class DrawView: NSView {
                                            lineOrigin: NSPoint(x: originX, y: originY),
                                            lineDiff: NSPoint(x: diffX, y: diffY),
                                            lineWidth: lineWidth) {
-                    self.selectedView = self.subviews[index]
-                    selectedViewIndex = subviewDics.count - 1 - indexOfDic
-                    selectedViewType = type
-                    selectedViewLineWidth = lineWidth
-                    selectedViewDiffX = diffX
-                    selectedViewDiffY = diffY
+                    self.setSelectedView(view: self.subviews[index], index: subviewDics.count - 1 - indexOfDic, type: type)
                     return
                 }
             }
@@ -406,19 +428,24 @@ class DrawView: NSView {
                 imageView.image = NSImage(contentsOf: dialog.url!)
                 self.addSubviewAndResetRedoArrays(imageView)
                 self.behaviorsForUndo.append(.addView)
-                self.selectedView?.borderWidth = 0
-                imageView.borderWidth = 2
-                imageView.borderColor = .green
                 let imageViewlDic: [String:Any] = [
                     "type": DrawingMode.image,
                     "index": self.subviews.count - 1,
                     "originX": imageView.frame.origin.x,
                     "originY": imageView.frame.origin.y,
                     "width": imageView.frame.width,
-                    "height": imageView.frame.height]
+                    "height": imageView.frame.height,
+                    "size": maxLength
+                ]
                 self.subviewDics.append(imageViewlDic)
+                self.setSelectedView(view: imageView, index: self.subviews.count-1, type: .image)
             }
         }
+    }
+    
+    public func bringFront() {
+        copyView(removeTargetView: true)
+        pasteView(shiftPosition: false)
     }
     
     public func clearCanvas() {
@@ -467,27 +494,25 @@ class DrawView: NSView {
         label.frame = NSRect(x: x, y: y, width: width, height: height)
         self.addSubviewAndResetRedoArrays(label)
         behaviorsForUndo.append(.addView)
-        selectedView?.borderWidth = 0
-        label.borderWidth = 2
-        label.borderColor = .green
         let labelDic: [String:Any] = [
             "type": DrawingMode.label,
             "index": self.subviews.count - 1,
             "originX": label.frame.origin.x,
             "originY": label.frame.origin.y,
             "width": label.frame.width,
-            "height": label.frame.height]
+            "height": label.frame.height,
+            "size": globalLabelSize
+        ]
         subviewDics.append(labelDic)
+        self.setSelectedView(view: label, index: self.subviews.count-1, type: .label)
     }
  
     var copiedType = DrawingMode.square
     var copiedLineView: LineView?
     var copiedImageView: NSImageView?
     var copiedLabel: NSTextField?
+    var copiedDic: [String: Any]?
     var selectedViewType: DrawingMode = .square
-    var selectedViewLineWidth: CGFloat = 0
-    var selectedViewDiffX: CGFloat = 0
-    var selectedViewDiffY: CGFloat = 0
     
     func copyView(removeTargetView: Bool) {
         if selectedView != nil {
@@ -514,20 +539,22 @@ class DrawView: NSView {
                 copiedLineView!.fillsShapes = (selectedView as! LineView).fillsShapes
                 copiedLineView!.frame = (selectedView as! LineView).frame
             }
+            copiedDic = subviewDics[selectedViewIndex]
             if removeTargetView {
                 delete()
             }
         }
     }
     
-    func pasteView() {
+    func pasteView(shiftPosition: Bool) {
         if copiedType == .image {
             guard copiedImageView != nil else { return }
             let pastedImageView = NSImageView()
             pastedImageView.image = copiedImageView!.image
             pastedImageView.imageScaling = .scaleAxesIndependently
             let rect = copiedImageView!.frame
-            pastedImageView.frame = NSRect(x: rect.origin.x + 50, y: rect.origin.y + 50, width: rect.width, height: rect.height)
+            let shift: CGFloat = shiftPosition ? 50 : 0
+            pastedImageView.frame = NSRect(x: rect.origin.x + shift, y: rect.origin.y + shift, width: rect.width, height: rect.height)
             self.addSubviewAndResetRedoArrays(pastedImageView)
             behaviorsForUndo.append(.addView)
             copiedImageView = pastedImageView
@@ -537,7 +564,9 @@ class DrawView: NSView {
                 "originX": pastedImageView.frame.origin.x,
                 "originY": pastedImageView.frame.origin.y,
                 "width": pastedImageView.frame.width,
-                "height": pastedImageView.frame.height]
+                "height": pastedImageView.frame.height,
+                "size": copiedDic!["size"] as! CGFloat
+            ]
             self.subviewDics.append(imageViewlDic)
         } else if copiedType == .label {
             guard copiedLabel != nil else { return }
@@ -548,7 +577,8 @@ class DrawView: NSView {
             pastedLabel.textColor = copiedLabel!.textColor
             pastedLabel.sizeToFit()
             let rect = copiedLabel!.frame
-            pastedLabel.frame = NSRect(x: rect.origin.x + 50, y: rect.origin.y + 50, width: rect.width, height: rect.height)
+            let shift: CGFloat = shiftPosition ? 50 : 0
+            pastedLabel.frame = NSRect(x: rect.origin.x + shift, y: rect.origin.y + shift, width: rect.width, height: rect.height)
             self.addSubviewAndResetRedoArrays(pastedLabel)
             behaviorsForUndo.append(.addView)
             copiedLabel = pastedLabel
@@ -558,7 +588,9 @@ class DrawView: NSView {
                 "originX": pastedLabel.frame.origin.x,
                 "originY": pastedLabel.frame.origin.y,
                 "width": pastedLabel.frame.width,
-                "height": pastedLabel.frame.height]
+                "height": pastedLabel.frame.height,
+                "size": copiedDic!["size"] as! CGFloat
+            ]
             subviewDics.append(labelDic)
         } else {
             guard copiedLineView != nil else { return }
@@ -569,23 +601,44 @@ class DrawView: NSView {
             pastedLineView.drawingMode = copiedType
             pastedLineView.fillsShapes = copiedLineView!.fillsShapes
             let rect = copiedLineView!.frame
-            pastedLineView.frame = NSRect(x: rect.origin.x + 50, y: rect.origin.y + 50, width: rect.width, height: rect.height)
+            let shift: CGFloat = shiftPosition ? 50 : 0
+            if copiedType == .line || copiedType == .arrow {
+                pastedLineView.frame = rect
+            } else {
+                pastedLineView.frame = NSRect(x: rect.origin.x + shift, y: rect.origin.y + shift, width: rect.width, height: rect.height)
+            }
             self.addSubviewAndResetRedoArrays(pastedLineView)
             behaviorsForUndo.append(.addView)
             copiedLineView = pastedLineView
-            var copyDic: [String:Any] = [
+            var newDic: [String:Any] = [
                 "type": copiedType,
                 "index": self.subviews.count - 1,
                 "originX": pastedLineView.frame.origin.x,
-                "originY": pastedLineView.frame.origin.y,
-                "width": pastedLineView.frame.width,
-                "height": pastedLineView.frame.height]
+                "originY": pastedLineView.frame.origin.y]
             if copiedType == .line || copiedType == .arrow {
-                copyDic.updateValue(selectedViewLineWidth / 2, forKey: "lineWidth")
-                copyDic.updateValue(selectedViewDiffX, forKey: "diffX")
-                copyDic.updateValue(selectedViewDiffY, forKey: "diffY")
+                let x = (copiedDic!["originX"] as! CGFloat) + shift
+                let y = (copiedDic!["originY"] as! CGFloat) + shift
+                let diffX = copiedDic!["diffX"] as! CGFloat
+                let diffY = copiedDic!["diffY"] as! CGFloat
+                drawLinePath(path: pastedLineView.path!,
+                             startPoint: NSPoint(x: x, y: y),
+                             endPoint: NSPoint(x: x + diffX, y: y + diffY),
+                             isArrow: copiedType == .arrow)
+                pastedLineView.needsDisplay = true
+                newDic.updateValue(x, forKey: "originX")
+                newDic.updateValue(y, forKey: "originY")
+                newDic.updateValue(diffX, forKey: "diffX")
+                newDic.updateValue(diffY, forKey: "diffY")
+                newDic.updateValue(copiedDic!["lineWidth"] as! CGFloat, forKey: "lineWidth")
+            } else if copiedType == .marker {
+                newDic.updateValue(copiedDic!["lineWidth"] as! CGFloat, forKey: "lineWidth")
+                newDic.updateValue(copiedDic!["points"] as! [NSPoint], forKey: "points")
+            } else {
+                newDic.updateValue(copiedDic!["width"] as! CGFloat, forKey: "width")
+                newDic.updateValue(copiedDic!["height"] as! CGFloat, forKey: "height")
             }
-            subviewDics.append(copyDic)
+            copiedDic = newDic
+            subviewDics.append(newDic)
         }
     }
     
@@ -694,6 +747,7 @@ class DrawView: NSView {
             label.frame = NSRect(x: x, y: y, width: width, height: height)
             subviewDics[selectedViewIndex].updateValue(width, forKey: "width")
             subviewDics[selectedViewIndex].updateValue(height, forKey: "height")
+            subviewDics[selectedViewIndex].updateValue(globalLabelSize, forKey: "size")
         }
     }
     
@@ -721,6 +775,7 @@ class DrawView: NSView {
             imageView.frame = NSRect(x: x, y: y, width: newSize.width, height: newSize.height)
             subviewDics[selectedViewIndex].updateValue(newSize.width, forKey: "width")
             subviewDics[selectedViewIndex].updateValue(newSize.height, forKey: "height")
+            subviewDics[selectedViewIndex].updateValue(maxLength, forKey: "size")
         }
     }
     
@@ -754,4 +809,11 @@ class LineView: NSView {
 enum Behavior {
     case addView
     case deleteView
+}
+
+protocol DrawViewDelegate: class {
+    func setLabelString(string: String, size: CGFloat)
+    func resetLabelString()
+    func setImageSize(size: CGFloat)
+    func setCurrentColor(color: NSColor)
 }

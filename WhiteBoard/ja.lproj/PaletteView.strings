@@ -3,7 +3,7 @@
 "BcQ-4y-Q7J.title" = "ブラシ";
 
 /* Class = "NSTextFieldCell"; title = "Text Label"; ObjectID = "ILb-Lk-GWN"; */
-"ILb-Lk-GWN.title" = "ラベル";
+"ILb-Lk-GWN.title" = "テキストラベル";
 
 /* Class = "NSTextFieldCell"; title = "Shape"; ObjectID = "K9s-N8-Kff"; */
 "K9s-N8-Kff.title" = "図形";
@@ -29,3 +29,4 @@
 
 "J8P-ik-DsP.title" = "サイズ　";
 "P9d-AG-u5X.title" = "テキスト";
+"yne-rw-Ou1.title" = "最前面に移動";
